@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Classup Tests</title>
+</head>
+<body>
+<link href="jasmine.css" rel="stylesheet" />
+<!-- include the jasmine libs -->
+<script src="jasmine.js"></script>
+<script src="jasmine-html.js"></script>
+<!-- include classup -->
+<script src="../src/helpers/multiprop.js"></script>
+<!-- include the specs -->
+<script src="specs/props-single.js"></script>
+<script src="specs/props-multi.js"></script>
+<script src="specs/props-nonprops.js"></script>
+<!-- run the tests -->
+<script defer="true">
+jasmine.getEnv().addReporter(new jasmine.TrivialReporter());
+jasmine.getEnv().execute();
+</script>
+</body>
+</html>
