@@ -11,13 +11,19 @@
 <body>
 	<h1>Page Header</h1>
 	<div class="box"></div>
+	<div class="box"></div>
 	<script src="../bedazzle.js"></script>
 	<script>
-	bedazzle('.box')
-		('x', 100)
-		('r', 45)
-		('y', 200)
-		.apply();
+	bedazzle('.box', '', { transition: '0.5s ease-in-out'})
+		('x100 y100 r90 scale0.5')
+		(function() {
+			this('x100 y-100 r-270 scale0.5')(function() {
+				this('undo').apply(function() {
+					this('undo')(function() {
+					});
+				});
+			});
+		});
 	</script>
 </body>
 </html>

@@ -17,7 +17,9 @@
 		('x', 100)
 		('r', 45)
 		('y', 200)
-		.apply();
+		(function() { 
+			this('undo').apply();
+		});
 	</script>
 </body>
 </html>

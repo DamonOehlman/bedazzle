@@ -2,6 +2,7 @@ var interleave = require('interleave'),
     fs = require('fs'),
     config = {
         aliases: {
+            cog: 'github://DamonOehlman/cog/cogs/$1'
         }
     };
 
