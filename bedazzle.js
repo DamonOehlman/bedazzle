@@ -48,11 +48,18 @@ var bedazzle = (function() {
             'transition'         : 'transitionEnd'
         },
         transformProps = ['x', 'y', 'z', 'r', 'ry', 'rz', 'scale'],
+        transformPropCount = transformProps.length,
+        transformParsers = [
+            { regex: /translate\((\d+)px\,\s+(\d+)px\)/, x: 1, y: 2 }
+        ],
+        transformParserCount = transformParsers.length,
         multiplicatives = {
             scale: 1,
             opacity: 1
         },
-        transformPropCount = transformProps.length,
+        reSpace = /\s+/,
+        reCommaSep = /\s*?\,\s*/,
+        reTransition = /([\w\-]+)\s*(.*)/,
         transEndEvent;
             
     var _bedazzle = function(elements, dscript, opts, scope) {
@@ -94,61 +101,60 @@ var bedazzle = (function() {
             }
         } // addToChain
         
-        function applyProperties(transition, callback) {
-            var ii, key, propName, propValue, realProps,
-                transitionProps = {},
-                transitionComplete = false,
-                startTick = new Date().getTime(),
-                fireCount = 0,
+        function applyProps(element) {
+            // read the transform props
+            var transformData = parseTransform(element),
+                key, elementData = {},
+                transitionProps = {};
                 
-                transitionEnd = function(evt) {
-                    var transProp = evt.propertyName || '',
-                        tickDiff = (evt.timeStamp || new Date().getTime()) - startTick;
-                        
-                    if (transitionProps[transProp] && tickDiff > 50) {
-                        elements[0].removeEventListener(transEndEvent, transitionEnd);
-                        // elements[0].style[getBrowserProp('transition')] = '';
-                        
-                        if (callback) {
-                            // console.log(evt.timeStamp - startTick, fireCount++, evt);
-                            callback();
-                        }
-                    }
-                };
-                
-            // create transform where appropriate
-            realProps = convertProps();
-
-            // create the combined property list
-            for (key in realProps) {
-                transitionProps[key] = transition;
-            }
-            
-            // iterate through the elements and apply the properties
-            for (ii = 0; ii < elements.length; ii++) {
-                // apply the transition
-                applyTransitions(elements[ii], transitionProps);
-
-                // iterate through the properties and apply
-                for (key in realProps) {
-                    elements[ii].style[key] = realProps[key];
-                } // for
+            // iterate through the prop data and make a copy
+            for (key in propData) {
+                elementData[key] = propData[key];
             } // for
             
-            // watch for the transition end event on the first item
-            if (elements[0]) {
-                elements[0].addEventListener(transEndEvent, transitionEnd, false);
-            }
-        } // applyProperties
+            // now apply and transform data that hasn't been set
+            // by existing properties
+            for (key in transformData) {
+                if (transformData[key] && (! propData[key])) {
+                    elementData[key] = transformData[key];
+                    changed[key] = true;
+                }
+            } // for
+            
+            // convert the element data into properties we can apply
+            elementData = convertProps(elementData);
+            
+            // iterate through the element styles and apply
+            for (key in elementData) {
+                var prop = getBrowserProp(key);
+                
+                element.style[prop] = elementData[key];
+                transitionProps[prop] = true;
+            } // for
+            
+            return transitionProps;
+        } // applyProps
         
-        function applyTransitions(element, transitionProps) {
-            var transitions = [];
-            
-            for (var key in transitionProps) {
-                transitions.push(key + ' ' + transitionProps[key]);
+        function applyTransitions(element, transitionProps, transition) {
+            var transitions = [],
+                propName = getBrowserProp('transition'),
+                existing = element.style[propName].split(reCommaSep),
+                ii, key, match;
+                
+            // iterate through the existing transitions
+            for (ii = existing.length; ii--; ) {
+                match = reTransition.exec(existing[ii]);
+                if (match) {
+                    transitionProps[match[1]] = transitionProps[match[1]] || match[2];
+                } // if
             } // for
             
-            element.style[getBrowserProp('transition')] = transitions.join(', ');
+            // read the existing transition properties
+            for (key in transitionProps) {
+                transitions.push(key + ' ' + transition);
+            } // for
+            
+            element.style[propName] = transitions.join(', ');
         } // applyTransitions
         
         function createUndoChain(items) {
@@ -192,18 +198,21 @@ var bedazzle = (function() {
             return browserProps[propName] = browserProp;
         } // getTransitionEndEvent
         
-        function convertProps() {
+        function convertProps(props) {
             var realProps = {}, key;
             
+            // use the prop data if we don't have specific properties
+            props = props || propData;
+            
             // copy the property data
-            for (key in propData) {
+            for (key in props) {
                 if (changed[key]) {
-                    realProps[key] = propData[key];
+                    realProps[key] = props[key];
                 } // if
             } // for
             
             // make the transform prop
-            realProps[getBrowserProp('transform')] = 
+            realProps.transform = 
                 'translate(' + (realProps.x || 0) + 'px, ' + (realProps.y || 0) + 'px) ' + 
                 'rotate(' + (realProps.r || 0) + 'deg) rotateY(' + (realProps.ry || 0) + 'deg) ' +
                 'scale(' + (realProps.scale || 1) + ') ' + 
@@ -216,6 +225,63 @@ var bedazzle = (function() {
             
             return realProps;
         } // makeTransforms
+        
+        function parseTransform(element) {
+            var transform = element.style[getBrowserProp('transform')] || '',
+                ii, match, key, parser, 
+                data = {};
+                
+            // iterate through the transform parsers
+            for (ii = 0; ii < transformParserCount; ii++) {
+                parser = transformParsers[ii];
+                
+                match = parser.regex.exec(transform);
+                if (match) {
+                    for (key in parser) {
+                        if (key !== 'regex') {
+                            data[key] = match[parser[key]];
+                        }
+                    }
+                }
+            } // for
+            
+            return data;
+        } // parseTransform
+        
+        function processProperties(transition, callback) {
+            var ii, key, propName, propValue, realProps,
+                transitionProps = {},
+                transitionComplete = false,
+                startTick = new Date().getTime(),
+                fireCount = 0,
+                
+                transitionEnd = function(evt) {
+                    var transProp = evt.propertyName || '',
+                        tickDiff = (evt.timeStamp || new Date().getTime()) - startTick;
+                        
+                    if (transitionProps[transProp] && tickDiff > 50) {
+                        elements[0].removeEventListener(transEndEvent, transitionEnd);
+                        // elements[0].style[getBrowserProp('transition')] = '';
+                        
+                        if (callback) {
+                            // console.log(evt.timeStamp - startTick, fireCount++, evt);
+                            callback();
+                        }
+                    }
+                };
+                
+            // iterate through the elements and apply the properties
+            for (ii = 0; ii < elements.length; ii++) {
+                // apply the transition
+                transitionProps = applyProps(elements[ii]);
+                applyTransitions(elements[ii], transitionProps, transition);
+            } // for
+            
+            // watch for the transition end event on the first item
+            if (elements[0]) {
+                elements[0].addEventListener(transEndEvent, transitionEnd, false);
+            }
+        } // processProperties
         
         function updatePropData(name, value) {
             var browserProp = getBrowserProp(name), newVal = value,
@@ -241,7 +307,7 @@ var bedazzle = (function() {
             // if we have a function, then wait for the transition end
             // then call the function
             if ((! item) || typeof item == 'function') {
-                applyProperties(transition, function() {
+                processProperties(transition, function() {
                     // create the undo chain
                     if (! isUndo) {
                         undoStack.push(createUndoChain(chain));
