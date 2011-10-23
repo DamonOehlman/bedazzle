@@ -44,10 +44,14 @@ var bedazzle = (function() {
             changed = {},
             isUndo = false,
             commandHandlers = {
-                undo: function() {
+                undo: function(callback) {
                     isUndo = true;
                     chain = [].concat(undoStack.pop());
-                }
+                    
+                    callback();
+                },
+                
+                go: dazzle
             };
 
         function addToChain(prop, propValue) {
@@ -68,40 +72,6 @@ var bedazzle = (function() {
                 }
             }
         } // addToChain
-        
-        function applyProps(element) {
-            // read the transform props
-            var transformData = parseTransform(element),
-                key, elementData = {},
-                transitionProps = {};
-                
-            // iterate through the prop data and make a copy
-            for (key in propData) {
-                elementData[key] = propData[key];
-            } // for
-            
-            // now apply and transform data that hasn't been set
-            // by existing properties
-            for (key in transformData) {
-                if (transformData[key] && (! propData[key])) {
-                    elementData[key] = transformData[key];
-                    changed[key] = true;
-                }
-            } // for
-            
-            // convert the element data into properties we can apply
-            elementData = convertProps(elementData);
-            
-            // iterate through the element styles and apply
-            for (key in elementData) {
-                var prop = getBrowserProp(key);
-                
-                element.style[prop] = elementData[key];
-                transitionProps[prop] = true;
-            } // for
-            
-            return transitionProps;
-        } // applyProps
         
         function applyTransitions(element, transitionProps, transition) {
             var transitions = [],
@@ -166,33 +136,46 @@ var bedazzle = (function() {
             return browserProps[propName] = browserProp;
         } // getTransitionEndEvent
         
-        function convertProps(props) {
-            var realProps = {}, key;
+        function getUpdatedProps(element) {
+            // read the transform props
+            var transformData = parseTransform(element),
+                key, elementData = {}, changedData = {};
+                
+            // iterate through the prop data and make a copy
+            for (key in propData) {
+                elementData[key] = propData[key];
+            } // for
             
-            // use the prop data if we don't have specific properties
-            props = props || propData;
+            // now apply and transform data that hasn't been set
+            // by existing properties
+            for (key in transformData) {
+                if (transformData[key] && typeof propData[key] == 'undefined') {
+                    elementData[key] = transformData[key];
+                    changed[key] = true;
+                }
+            } // for
             
             // copy the property data
-            for (key in props) {
+            for (key in elementData) {
                 if (changed[key]) {
-                    realProps[key] = props[key];
+                    changedData[key] = elementData[key];
                 } // if
             } // for
             
             // make the transform prop
-            realProps.transform = 
-                'translate(' + (realProps.x || 0) + 'px, ' + (realProps.y || 0) + 'px) ' + 
-                'rotate(' + (realProps.r || 0) + 'deg) rotateY(' + (realProps.ry || 0) + 'deg) ' +
-                'scale(' + (realProps.scale || 1) + ') ' + 
-                'translateZ(' + (realProps.z || 0) + 'px)';
+            changedData.transform = 
+                'translate(' + (changedData.x || 0) + 'px, ' + (changedData.y || 0) + 'px) ' + 
+                'rotate(' + (changedData.r || 0) + 'deg) rotateY(' + (changedData.ry || 0) + 'deg) ' +
+                'scale(' + (changedData.scale || 1) + ') ' + 
+                'translateZ(' + (changedData.z || 0) + 'px)';
 
             // clear the transform props
             for (var ii = 0; ii < transformPropCount; ii++) {
-                delete realProps[transformProps[ii]];
+                delete changedData[transformProps[ii]];
             } // for
             
-            return realProps;
-        } // makeTransforms
+            return changedData;
+        } // getUpdatedProps        
         
         function parseTransform(element) {
             var transform = element.style[getBrowserProp('transform')] || '',
@@ -215,6 +198,40 @@ var bedazzle = (function() {
             
             return data;
         } // parseTransform
+
+        function prefixProps(props) {
+            var out = {};
+            
+            for (var key in props) {
+                out[getBrowserProp(key)] = props[key];
+            }
+            
+            return out;
+        } // prefixProps
+        
+        function processCommands(commands, callback) {
+            var command = commands[0];
+            if (command) {
+                // if it is an actual command rather than a property, then process
+                if (commandHandlers[command]) {
+                    commandHandlers[command].call(this, function() {
+                        processCommands(commands.slice(1), callback);
+                    });
+                }
+                // otherwise, process the property
+                else {
+                    var data = _parseprops(command);
+                    for (var key in data) {
+                        addToChain(key, data[key]);
+                    } // for
+                    
+                    processCommands(commands.slice(1), callback);
+                }
+            }
+            else if (callback) {
+                callback.call(dazzle);
+            } // if..else
+        } // processCommands
         
         function processProperties(transition, callback) {
             var ii, key, propName, propValue, realProps,
@@ -240,9 +257,20 @@ var bedazzle = (function() {
                 
             // iterate through the elements and apply the properties
             for (ii = 0; ii < elements.length; ii++) {
+                var updatedProps = getUpdatedProps(elements[ii]);
+                
+                // FIXME: hacky
+                if (ii === 0) {
+                    transitionProps = prefixProps(updatedProps);
+                }
+                
                 // apply the transition
-                transitionProps = applyProps(elements[ii]);
-                applyTransitions(elements[ii], transitionProps, transition);
+                applyTransitions(elements[ii], prefixProps(updatedProps), transition);
+                
+                // update the properties
+                for (key in updatedProps) {
+                    elements[ii].style[getBrowserProp(key)] = updatedProps[key];
+                }
             } // for
             
             // watch for the transition end event on the first item
@@ -303,12 +331,18 @@ var bedazzle = (function() {
         } // walkChain
 
         function dazzle(prop, propVal) {
-            if (typeof propVal != 'undefined') {
+            if (typeof propVal == 'function') {
+                processCommands(prop.split(reSpace), propVal);
+            }
+            else if (typeof propVal != 'undefined') {
                 addToChain(prop, propVal);
             }
             else if (typeof prop == 'string' || prop instanceof String) {
+                processCommands(prop.split(reSpace), opts.callback);
+                
+                /*
                 // check if the property is a command
-                var command = commandHandlers[prop], props;
+                prop = extractCommands(prop, commands);
                 
                 if (command) {
                     command(prop, propVal);
@@ -322,6 +356,7 @@ var bedazzle = (function() {
                         addToChain(props);
                     } // if
                 }
+                */
             }
             else if (typeof prop == 'function') {
                 walkChain(chain.concat(prop), opts.transition);
@@ -360,7 +395,7 @@ var bedazzle = (function() {
 
             // apply the requested action
             if (dscript) {
-                dazzle(dscript)();
+                dazzle(dscript);
             } // if
         } // if
 
