@@ -10,21 +10,21 @@ In the simplest case, you can use bedazzle to update object properties using a c
 
 ```js
 bedazzle('.box')
-	.set('x', 100)
-	.set('r', 45)
-	.set('y', 100)
-	.run('go', function() {
-		alert('finished');
-	});
+    .set('x', 100)
+    .set('r', 45)
+    .set('y', 100)
+    .run('go', function() {
+        alert('finished');
+    });
 ```
 
 In general though, I prefer writing as little text as possible, so the example shown below is also equivalent to the simple example above:
 
 ```js
 bedazzle('.box')
-	.run('x100 y100 r90 go', function() {
-		alert('finished');
-	});
+    .run('x100 y100 r90 go', function() {
+        alert('finished');
+    });
 ```
 
 In both cases, a `go` command is required to trigger the animation.
@@ -33,20 +33,20 @@ In addition to the `go` command, bedazzle also includes an `undo` command which 
 
 ```js
 bedazzle('.box')
-	.run('x100 y100 r90 go undo go', function() {
-		alert('finished');
-	});
+    .run('x100 y100 r90 go undo go', function() {
+        alert('finished');
+    });
 ```
 
 With these features you can start to create some [reasonably interesting animations](/DamonOehlman/bedazzle/demos/simple-stateful.html):
 
 ```js
 bedazzle('.box', '', { transition: '0.5s ease-in-out'})
-	.run('x100 y100 r90 scale0.5 background:green opacity:0.5 go', function() {
-		this.run('x100 y-100 r-270 scale0.5 go undo go undo go', function() {
-			alert('finished');
-		});
-	});
+    .run('x100 y100 r90 scale0.5 background:green opacity:0.5 go', function() {
+        this.run('x100 y-100 r-270 scale0.5 go undo go undo go', function() {
+            alert('finished');
+        });
+    });
 ```
 
 Finally, some effort has gone into making bedazzle animations [play nice with parallel animations](/DamonOehlman/bedazzle/demos/parallel.html) (bedazzle controlled or otherwise).  More effort is required here, but things are looking reasonably good:
