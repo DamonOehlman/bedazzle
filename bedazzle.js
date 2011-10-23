@@ -38,7 +38,7 @@ var bedazzle = (function() {
     var pMap = {
             rotate: 'r'
         },
-        prefixes = ['-webkit-', '-moz-', '-o-'],
+        prefixes = ['', '-webkit-', '-moz-', '-o-'],
         prefixCount = prefixes.length,
         browserProps = {},
         transEndEventNames = {
@@ -49,7 +49,8 @@ var bedazzle = (function() {
         },
         transformProps = ['x', 'y', 'z', 'r', 'ry', 'rz', 'scale'],
         multiplicatives = {
-            scale: 1
+            scale: 1,
+            opacity: 1
         },
         transformPropCount = transformProps.length,
         transEndEvent;
@@ -65,6 +66,7 @@ var bedazzle = (function() {
         var chain = [],
             undoStack = [],
             propData = {},
+            changed = {},
             isUndo = false,
             commandHandlers = {
                 undo: function() {
@@ -94,32 +96,43 @@ var bedazzle = (function() {
         
         function applyProperties(transition, callback) {
             var ii, key, propName, propValue, realProps,
-                transitionProps = '';
+                transitionProps = {},
+                transitionComplete = false,
+                startTick = new Date().getTime(),
+                fireCount = 0,
                 
-            function transitionEnd(evt) {
-                elements[0].removeEventListener(transEndEvent, transitionEnd);
-                if (callback) {
-                    callback();
-                }
-            } // transitionEnd
-            
+                transitionEnd = function(evt) {
+                    var transProp = evt.propertyName || '',
+                        tickDiff = (evt.timeStamp || new Date().getTime()) - startTick;
+                        
+                    if (transitionProps[transProp] && tickDiff > 50) {
+                        elements[0].removeEventListener(transEndEvent, transitionEnd);
+                        // elements[0].style[getBrowserProp('transition')] = '';
+                        
+                        if (callback) {
+                            // console.log(evt.timeStamp - startTick, fireCount++, evt);
+                            callback();
+                        }
+                    }
+                };
+                
             // create transform where appropriate
             realProps = convertProps();
 
             // create the combined property list
             for (key in realProps) {
-                transitionProps += key + ' ';
+                transitionProps[key] = transition;
             }
             
             // iterate through the elements and apply the properties
             for (ii = 0; ii < elements.length; ii++) {
+                // apply the transition
+                applyTransitions(elements[ii], transitionProps);
+
                 // iterate through the properties and apply
                 for (key in realProps) {
                     elements[ii].style[key] = realProps[key];
                 } // for
-                
-                // apply the transition
-                elements[ii].style[getBrowserProp('transition')] = transitionProps + transition;
             } // for
             
             // watch for the transition end event on the first item
@@ -127,6 +140,16 @@ var bedazzle = (function() {
                 elements[0].addEventListener(transEndEvent, transitionEnd, false);
             }
         } // applyProperties
+        
+        function applyTransitions(element, transitionProps) {
+            var transitions = [];
+            
+            for (var key in transitionProps) {
+                transitions.push(key + ' ' + transitionProps[key]);
+            } // for
+            
+            element.style[getBrowserProp('transition')] = transitions.join(', ');
+        } // applyTransitions
         
         function createUndoChain(items) {
             // create a command list based on the items listed
@@ -174,7 +197,9 @@ var bedazzle = (function() {
             
             // copy the property data
             for (key in propData) {
-                realProps[key] = propData[key];
+                if (changed[key]) {
+                    realProps[key] = propData[key];
+                } // if
             } // for
             
             // make the transform prop
@@ -193,19 +218,21 @@ var bedazzle = (function() {
         } // makeTransforms
         
         function updatePropData(name, value) {
-            var browserProp = getBrowserProp(name);
+            var browserProp = getBrowserProp(name), newVal = value,
+                currentValue = propData[browserProp];
             
-            if (! propData[browserProp]) {
-                propData[browserProp] = value;
-            }
-            else if (! isNaN(propData[browserProp]) || isNaN(value)) {
+            if (typeof currentValue != 'undefined' && (! isNaN(currentValue) || isNaN(value))) {
                 if (multiplicatives[name]) {
-                    propData[browserProp] *= value;
+                    newVal = currentValue * value;
                 }
                 else {
-                    propData[browserProp] += value;
+                    newVal = currentValue + value;
                 }
-            }
+            } // if
+            
+            // update the property value
+            changed[browserProp] = currentValue !== newVal;
+            propData[browserProp] = newVal;
         } // updatePropData
         
         function walkChain(items, transition) {
@@ -223,6 +250,7 @@ var bedazzle = (function() {
                     // reset the chain
                     chain = [];
                     isUndo = false;
+                    changed = {};
                     
                     // if we have a callback, then fire it
                     if (item) {
