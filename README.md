@@ -38,7 +38,7 @@ bedazzle('.box')
     });
 ```
 
-With these features you can start to create some [reasonably interesting animations](/DamonOehlman/bedazzle/demos/simple-stateful.html):
+With these features you can start to create some [reasonably interesting animations](DamonOehlman/bedazzle/blob/master/demos/simple-stateful.html):
 
 ```js
 bedazzle('.box', '', { transition: '0.5s ease-in-out'})
@@ -49,7 +49,7 @@ bedazzle('.box', '', { transition: '0.5s ease-in-out'})
     });
 ```
 
-Finally, some effort has gone into making bedazzle animations [play nice with parallel animations](/DamonOehlman/bedazzle/demos/parallel.html) (bedazzle controlled or otherwise).  More effort is required here, but things are looking reasonably good:
+Finally, some effort has gone into making bedazzle animations [play nice with parallel animations](DamonOehlman/bedazzle/blob/master/demos/parallel.html) (bedazzle controlled or otherwise).  More effort is required here, but things are looking reasonably good:
 
 ```
 bedazzle('.fader', 'opacity0.5 go', { transition: '2s ease-in-out' });
