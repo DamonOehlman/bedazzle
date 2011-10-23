@@ -75,6 +75,11 @@ var bedazzle = (function() {
             propData = {},
             changed = {},
             isUndo = false,
+            dazzler = {
+                run: run,
+                // add run aliases
+                set: run
+            },
             commandHandlers = {
                 undo: function(callback) {
                     isUndo = true;
@@ -83,7 +88,7 @@ var bedazzle = (function() {
                     callback();
                 },
                 
-                go: dazzle
+                go: run
             };
 
         function addToChain(prop, propValue) {
@@ -261,7 +266,7 @@ var bedazzle = (function() {
                 }
             }
             else if (callback) {
-                callback.call(dazzle);
+                callback.call(dazzler);
             } // if..else
         } // processCommands
         
@@ -348,7 +353,7 @@ var bedazzle = (function() {
                     
                     // if we have a callback, then fire it
                     if (item) {
-                        item.call(dazzle);
+                        item.call(dazzler);
                     } // if
                 });
             }
@@ -362,7 +367,7 @@ var bedazzle = (function() {
             } // if..else
         } // walkChain
 
-        function dazzle(prop, propVal) {
+        function run(prop, propVal) {
             if (typeof propVal == 'function') {
                 processCommands(prop.split(reSpace), propVal);
             }
@@ -408,7 +413,7 @@ var bedazzle = (function() {
                 );
             } // if..else
 
-            return dazzle;
+            return dazzler;
         } // dazzle
 
         // check the elements
@@ -427,11 +432,11 @@ var bedazzle = (function() {
 
             // apply the requested action
             if (dscript) {
-                dazzle(dscript);
+                run(dscript);
             } // if
         } // if
 
-        return dazzle;
+        return dazzler;
     };
     
     // on load look for bedazzle scripts

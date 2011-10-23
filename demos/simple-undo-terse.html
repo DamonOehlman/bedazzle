@@ -13,13 +13,11 @@
 	<div class="box"></div>
 	<script src="../bedazzle.js"></script>
 	<script>
-	bedazzle('.box')
-		.set('x', 100)
-		.set('r', 45)
-		.set('y', 100)
-		.run('go', function() {
+	bedazzle('.box', 'x100 y100 r90 go undo go', {
+		callback: function() {
 			alert('finished');
-		});
+		}
+	});
 	</script>
 </body>
 </html>

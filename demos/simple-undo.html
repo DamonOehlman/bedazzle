@@ -14,11 +14,11 @@
 	<script src="../bedazzle.js"></script>
 	<script>
 	bedazzle('.box')
-		('x', 100)
-		('r', 45)
-		('y', 200)
-		(function() { 
-			this('undo').apply();
+		.set('x', 100)
+		.set('r', 45)
+		.set('y', 200)
+		.run(function() { 
+			this.run('undo go');
 		});
 	</script>
 </body>
