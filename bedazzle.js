@@ -114,7 +114,7 @@ var bedazzle = (function() {
         function applyTransitions(element, transitionProps, transition) {
             var transitions = [],
                 propName = getBrowserProp('transition').dom,
-                existing = element.style[propName].split(reCommaSep),
+                existing = (element.style[propName] || '').split(reCommaSep),
                 ii, key, match;
                 
             // iterate through the existing transitions
