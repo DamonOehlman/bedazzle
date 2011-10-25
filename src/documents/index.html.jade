@@ -1,0 +1,43 @@
+---
+layout: main
+title: CSS3 Transforms and Transitions from JavaScript
+---
+
+:markdown
+    Bedazzle is a JavaScript library which makes it simple to animate 
+    DOM elements through CSS3 [Transitions](http://www.w3.org/TR/css3-transitions/) 
+    and [Transforms](http://www.w3.org/TR/css3-2d-transforms/).
+
+h2 Simple Command Syntax
+
+p Bedazzle uses a simple, chainable command syntax:
+
+pre
+    | // animate the x position from 0 to 100
+    | bedazzle('.box')
+    |   .move('x', 100)
+    |   .run('go');
+
+h2 Feel Free to be Terse
+
+p Bedazzle doesn't mind if you prefer typing less characters:
+
+pre
+    | // move the box from 0 to 100
+    | bedazzle('.box', 'x100 go');
+
+h2 Stateful by default
+
+p CSS Transforms aren't stateful, but bedazzle is:
+
+pre
+    | // find the box
+    | bedazzle('.box')
+    |   .move('x', 100)
+    |   .run('go', function() {
+    |       this.move('x', 100).run('go');
+    |   });
+
+h2 Undo Things
+
+p 

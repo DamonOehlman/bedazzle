@@ -10,6 +10,14 @@ h1 {
   color: #d8d8d8;
   margin: 0 0 40px 0;
 }
+h2 {
+  color: #555;
+  margin: 0 0 0 5px;
+  font-size: 1.2em;
+}
+h2 ~ p {
+  margin: 5px 5px 10px;
+}
 .logo {
   color: #fff;
   margin: 20px 0 0 0;
@@ -27,4 +35,34 @@ h1 {
   -o-border-radius: 10px;
   -ms-border-radius: 10px;
   border-radius: 10px;
+}
+pre.prettyprint {
+  border: 0;
+  background: #e8e8e8;
+  padding: 10px 9px 12px 15px;
+  margin: 5px 0 15px;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  -o-border-radius: 4px;
+  -ms-border-radius: 4px;
+  border-radius: 4px;
+}
+a.btn-run {
+  display: block;
+  float: right;
+  font-weight: bold;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  -o-border-radius: 4px;
+  -ms-border-radius: 4px;
+  border-radius: 4px;
+  background: #ccc;
+  border: 1px solid #bbb;
+  padding: 3px 7px 4px;
+  margin: 7px;
+  color: #333;
+  text-decoration: none;
+}
+a.btn-run:hover {
+  background: #d8d8d8;
 }

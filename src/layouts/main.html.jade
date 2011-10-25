@@ -4,6 +4,7 @@ html
         title #{Document.title}
         
         link(rel='stylesheet', href='http://fonts.googleapis.com/css?family=Gochi+Hand')
+        link(rel='stylesheet', href='css/prettify.css')
         link(rel='stylesheet', href='css/main.css')
     body
         div.logo Bedazzle
@@ -12,3 +13,8 @@ html
         
         div.main
             !{content}
+        
+        script(src='js/jquery-1.6.4.min.js')
+        script(src='js/classtweak.js')
+        script(src='js/prettify.js')
+        script(src='js/site.js')

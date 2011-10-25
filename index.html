@@ -1,2 +1,16 @@
-<!DOCTYPE html><html><head><title>Control CSS3 Transitions with JavaScript</title><link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Gochi+Hand"><link rel="stylesheet" href="css/main.css"></head><body><div class="logo">Bedazzle</div><h1>Control CSS3 Transitions with JavaScript</h1><div class="main"><p>Bedazzle is a library that makes it easy to generate and control <a href="http://www.w3.org/TR/css3-transitions/">CSS3 Transitions</a> and <a href="http://www.w3.org/TR/css3-2d-transforms/">Transforms</a>.</p>
-</div></body></html>
+<!DOCTYPE html><html><head><title>CSS3 Transforms and Transitions from JavaScript</title><link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Gochi+Hand"><link rel="stylesheet" href="css/prettify.css"><link rel="stylesheet" href="css/main.css"></head><body><div class="logo">Bedazzle</div><h1>CSS3 Transforms and Transitions from JavaScript</h1><div class="main"><p>Bedazzle is a JavaScript library which makes it simple to animate 
+DOM elements through CSS3 <a href="http://www.w3.org/TR/css3-transitions/">Transitions</a> 
+and <a href="http://www.w3.org/TR/css3-2d-transforms/">Transforms</a>.</p><h2>Simple Command Syntax</h2><p>Bedazzle uses a simple, chainable command syntax:</p><pre>// animate the x position from 0 to 100
+bedazzle('.box')
+  .move('x', 100)
+  .run('go');
+</pre><h2>Feel Free to be Terse</h2><p>Bedazzle doesn't mind if you prefer typing less characters:</p><pre>// move the box from 0 to 100
+bedazzle('.box', 'x100 go');
+</pre><h2>Stateful by default</h2><p>CSS Transforms aren't stateful, but bedazzle is:</p><pre>// find the box
+bedazzle('.box')
+  .move('x', 100)
+  .run('go', function() {
+      this.move('x', 100).run('go');
+  });
+</pre><h2>Undo Things</h2><p></p>
+</div><script src="js/jquery-1.6.4.min.js"></script><script src="js/classtweak.js"></script><script src="js/prettify.js"></script><script src="js/site.js"></script></body></html>
