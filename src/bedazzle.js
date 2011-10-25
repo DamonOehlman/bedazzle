@@ -46,8 +46,8 @@ var bedazzle = (function() {
             isUndo = false,
             dazzler = {
                 run: run,
-                // add run aliases
-                set: run
+                // add move aliases
+                move: run
             },
             commandHandlers = {
                 undo: function(callback) {

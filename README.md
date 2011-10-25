@@ -10,9 +10,9 @@ In the simplest case, you can use bedazzle to update object properties using a c
 
 ```js
 bedazzle('.box')
-    .set('x', 100)
-    .set('r', 45)
-    .set('y', 100)
+    .move('x', 100)
+    .move('r', 45)
+    .move('y', 100)
     .run('go', function() {
         alert('finished');
     });
