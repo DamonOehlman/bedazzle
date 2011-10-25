@@ -1,0 +1,14 @@
+!!! 5
+html
+    head
+        title #{Document.title}
+        
+        link(rel='stylesheet', href='http://fonts.googleapis.com/css?family=Gochi+Hand')
+        link(rel='stylesheet', href='css/main.css')
+    body
+        div.logo Bedazzle
+    
+        h1= Document.title
+        
+        div.main
+            !{content}
