@@ -39,6 +39,7 @@ var bedazzle = (function() {
             rotate: 'r'
         },
         prefixes = ['', '-webkit-', '-moz-', '-o-'],
+        domPrefixes = ['', 'Webkit', 'Moz', 'O'],
         prefixCount = prefixes.length,
         browserProps = {},
         transEndEventNames = {
@@ -112,7 +113,7 @@ var bedazzle = (function() {
         
         function applyTransitions(element, transitionProps, transition) {
             var transitions = [],
-                propName = getBrowserProp('transition'),
+                propName = getBrowserProp('transition').dom,
                 existing = element.style[propName].split(reCommaSep),
                 ii, key, match;
                 
@@ -155,20 +156,30 @@ var bedazzle = (function() {
         function getBrowserProp(propName) {
             if (browserProps[propName]) {
                 return browserProps[propName];
-            } // if
+            }
             
             // map the property name if applicable
-            var browserProp = pMap[propName] || propName,
-                ii, prefixed;
-            
+            var browserProp = {
+                    css: pMap[propName] || propName,
+                    dom: pMap[propName] || propName
+                },
+                testProps = [], ii;
+                
             // iterate through the prefixes and look for the relevant property
             for (ii = 0; ii < prefixCount; ii++) {
-                prefixed = prefixes[ii] + browserProp;
-                if (typeof elements[0].style[prefixed] != 'undefined') {
-                    browserProp = prefixed;
-                    break;
-                } // if
+                testProps.push({
+                    css: prefixes[ii] + propName,
+                    dom: domPrefixes[ii] + propName.slice(0, 1).toUpperCase() + propName.slice(1)
+                });
             } // for
+            
+            
+            for (ii = 0; ii < testProps.length; ii++) {
+                if (typeof elements[0].style[testProps[ii].dom] != 'undefined') {
+                    browserProp = testProps[ii];
+                    break;
+                }
+            }
             
             return browserProps[propName] = browserProp;
         } // getTransitionEndEvent
@@ -201,10 +212,10 @@ var bedazzle = (function() {
             
             // make the transform prop
             changedData.transform = 
-                'translate(' + (changedData.x || 0) + 'px, ' + (changedData.y || 0) + 'px) ' + 
-                'rotate(' + (changedData.r || 0) + 'deg) rotateY(' + (changedData.ry || 0) + 'deg) ' +
-                'scale(' + (changedData.scale || 1) + ') ' + 
-                'translateZ(' + (changedData.z || 0) + 'px)';
+                'translate(' + (changedData.x || 0) + 'px, ' + (changedData.y || 0) + 'px) ' +
+                'rotate(' + (changedData.r || 0) + 'deg) ' +  /* + rotateY(' + (changedData.ry || 0) + 'deg) ' + */
+                'scale(' + (changedData.scale || 1) + ')'; /* 
+                'translateZ(' + (changedData.z || 0) + 'px)'; */
 
             // clear the transform props
             for (var ii = 0; ii < transformPropCount; ii++) {
@@ -215,7 +226,7 @@ var bedazzle = (function() {
         } // getUpdatedProps        
         
         function parseTransform(element) {
-            var transform = element.style[getBrowserProp('transform')] || '',
+            var transform = element.style[getBrowserProp('transform').dom] || '',
                 ii, match, key, parser, 
                 data = {};
                 
@@ -236,11 +247,11 @@ var bedazzle = (function() {
             return data;
         } // parseTransform
 
-        function prefixProps(props) {
+        function prefixProps(props, attr) {
             var out = {};
             
             for (var key in props) {
-                out[getBrowserProp(key)] = props[key];
+                out[getBrowserProp(key)[attr || 'dom']] = props[key];
             }
             
             return out;
@@ -298,15 +309,17 @@ var bedazzle = (function() {
                 
                 // FIXME: hacky
                 if (ii === 0) {
-                    transitionProps = prefixProps(updatedProps);
+                    transitionProps = prefixProps(updatedProps, 'css');
                 }
                 
                 // apply the transition
-                applyTransitions(elements[ii], prefixProps(updatedProps), transition);
+                applyTransitions(elements[ii], prefixProps(updatedProps, 'css'), transition);
                 
                 // update the properties
                 for (key in updatedProps) {
-                    elements[ii].style[getBrowserProp(key)] = updatedProps[key];
+                    if (key) {
+                        elements[ii].style[getBrowserProp(key).dom] = updatedProps[key];
+                    }
                 }
             } // for
             
@@ -318,7 +331,7 @@ var bedazzle = (function() {
         
         function updatePropData(name, value) {
             var browserProp = getBrowserProp(name), newVal = value,
-                currentValue = propData[browserProp];
+                currentValue = propData[browserProp.dom];
             
             if (typeof currentValue != 'undefined' && (! isNaN(currentValue) || isNaN(value))) {
                 if (multiplicatives[name]) {
@@ -330,8 +343,8 @@ var bedazzle = (function() {
             } // if
             
             // update the property value
-            changed[browserProp] = currentValue !== newVal;
-            propData[browserProp] = newVal;
+            changed[name] = currentValue !== newVal;
+            propData[name] = newVal;
         } // updatePropData
         
         function walkChain(items, transition) {
@@ -428,7 +441,7 @@ var bedazzle = (function() {
 
         if (elements) {
             // determine the transitionend event name
-            transEndEvent = transEndEvent || transEndEventNames[getBrowserProp('transition')];
+            transEndEvent = transEndEvent || transEndEventNames[getBrowserProp('transition').css];
 
             // apply the requested action
             if (dscript) {
