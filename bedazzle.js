@@ -54,6 +54,7 @@ var bedazzle = (function() {
             { regex: /translate\((\d+)px\,\s+(\d+)px\)/, x: 1, y: 2 }
         ],
         transformParserCount = transformParsers.length,
+        transforms3d = false,
         multiplicatives = {
             scale: 1,
             opacity: 1
@@ -213,9 +214,10 @@ var bedazzle = (function() {
             // make the transform prop
             changedData.transform = 
                 'translate(' + (changedData.x || 0) + 'px, ' + (changedData.y || 0) + 'px) ' +
-                'rotate(' + (changedData.r || 0) + 'deg) ' +  /* + rotateY(' + (changedData.ry || 0) + 'deg) ' + */
-                'scale(' + (changedData.scale || 1) + ')'; /* 
-                'translateZ(' + (changedData.z || 0) + 'px)'; */
+                'rotate(' + (changedData.r || 0) + 'deg) ' +
+                (transforms3d ? 'rotateY(' + (changedData.ry || 0) + 'deg) ' : '') + 
+                'scale(' + (changedData.scale || 1) + ') ' + 
+                (transforms3d ? 'translateZ(' + (changedData.z || 0) + 'px)' : '');
 
             // clear the transform props
             for (var ii = 0; ii < transformPropCount; ii++) {
@@ -291,14 +293,14 @@ var bedazzle = (function() {
                 transitionEnd = function(evt) {
                     var transProp = evt.propertyName || '',
                         tickDiff = (evt.timeStamp || new Date().getTime()) - startTick;
-                        
+                    
+                    // FIXME: check the tickdiff more intelligently...
                     if (transitionProps[transProp] && tickDiff > 50) {
                         elements[0].removeEventListener(transEndEvent, transitionEnd);
-                        // elements[0].style[getBrowserProp('transition')] = '';
-                        
+
+                        // if we have a callback, fire it on the "next tick"
                         if (callback) {
-                            // console.log(evt.timeStamp - startTick, fireCount++, evt);
-                            callback();
+                            setTimeout(callback, 0);
                         }
                     }
                 };
@@ -451,6 +453,11 @@ var bedazzle = (function() {
 
         return dazzler;
     };
+    
+    // if we have modernizr, then do so tests
+    if (typeof Modernizr != 'undefined') {
+        transforms3d = Modernizr.csstransforms3d;
+    }
     
     // on load look for bedazzle scripts
     
