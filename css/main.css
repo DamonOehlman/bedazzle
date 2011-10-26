@@ -27,14 +27,14 @@ h2 ~ p {
 }
 .main {
   background: #f8f8f8;
-  margin: 20px 10px;
+  margin: 20px 10px 15px;
   padding: 10px 20px;
   border: 4px solid #aaa;
-  -webkit-border-radius: 10px 10px 0 0;
-  -moz-border-radius: 10px 10px 0 0;
-  -o-border-radius: 10px 10px 0 0;
-  -ms-border-radius: 10px 10px 0 0;
-  border-radius: 10px 10px 0 0;
+  -webkit-border-radius: 10px 10px 4px 4px;
+  -moz-border-radius: 10px 10px 4px 4px;
+  -o-border-radius: 10px 10px 4px 4px;
+  -ms-border-radius: 10px 10px 4px 4px;
+  border-radius: 10px 10px 4px 4px;
   -webkit-box-shadow: #000 0 2px 8px;
   -moz-box-shadow: #000 0 2px 8px;
   -o-box-shadow: #000 0 2px 8px;
@@ -70,4 +70,13 @@ a.btn-run {
 }
 a.btn-run:hover {
   background: #d8d8d8;
+}
+#bedazzle_stage {
+  border: 1px solid #ccc;
+  padding: 10px;
+}
+.box {
+  background: #f00;
+  width: 100px;
+  height: 100px;
 }

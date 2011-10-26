@@ -35,5 +35,7 @@ pre
     | bedazzle('.box')
     |   .move('x', 100)
     |   .run('go', function() {
-    |       this.move('x', 100).run('go');
+    |       this.move('x', 100)
+    |           .move('r', 180)
+    |           .run('go');
     |   });
