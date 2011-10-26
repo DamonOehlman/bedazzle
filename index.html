@@ -6,7 +6,7 @@ bedazzle('.box')
   .run('go');
 </pre><h2>Feel Free to be Terse</h2><p>Bedazzle doesn't mind if you prefer typing less characters:</p><pre>// move the box from 0 to 100
 bedazzle('.box', 'x100 go');
-</pre><h2>Stateful by default</h2><p>CSS Transforms aren't stateful, but bedazzle is:</p><pre>// find the box
+</pre><h2>Stateful by default</h2><p>CSS Transforms aren't stateful, but bedazzle is:</p><pre>// move the box right, and then move and rotate
 bedazzle('.box')
   .move('x', 100)
   .run('go', function() {
@@ -14,5 +14,12 @@ bedazzle('.box')
           .move('r', 180)
           .run('go');
   });
-</pre>
-</div><script src="js/jquery-1.6.4.min.js"></script><script src="js/classtweak.js"></script><script src="js/prettify.js"></script><script src="https://raw.github.com/DamonOehlman/bedazzle/master/bedazzle.js"></script><script src="js/site.js"></script></body></html>
+</pre><p>And the same again, but terse:</p><pre>// move the box right, and then move and rotate (again)
+bedazzle('.box', 'x100 go x100 r180 go');
+</pre><h2>Undo Things</h2><p>Want to go back?  Well, you can:</p><pre>// move as before, but then undo
+bedazzle('.box', 'x100 go x100 r180 go undo go undo go');
+</pre><h2>More to Come</h2>
+
+<p>Bedazzle is currently a proof of concept with limited browser support. If
+you have any requests or suggestions, then <a href="http://twitter.com/DamonOehlman">get in touch</a>.</p>
+</div><a href="https://github.com/DamonOehlman/bedazzle" title="Fork me on Github" class="forkme"></a><script src="js/jquery-1.6.4.min.js"></script><script src="js/classtweak.js"></script><script src="js/prettify.js"></script><script src="https://raw.github.com/DamonOehlman/bedazzle/master/bedazzle.js"></script><script src="js/site.js"></script></body></html>

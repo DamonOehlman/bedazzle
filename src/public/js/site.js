@@ -6,19 +6,22 @@
         var codeBlock = $(this).next('pre')[0];
 
         if (codeBlock) {
-            // create a script tag
+            var script = document.createElement('script');
+
+            // remove existing demo elements
             $('#bedazzle_demo').remove();
             $('#bedazzle_stage').remove();
             
+            // create the stage
             $(this).before('<div id="bedazzle_stage"><div class="box"></div></div>');
             
+            // add the script tag
+            script.id = 'bedazzle_demo';
+            script.text = codeBlock.textContent;
+            
             setTimeout(function() {
-                var script = document.createElement('script');
-                script.id = 'bedazzle_demo';
-                script.text = codeBlock.textContent;
-                
                 document.body.appendChild(script);
-            }, 100);
+            }, 0);
         }
         
         return false;

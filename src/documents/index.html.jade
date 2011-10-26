@@ -31,7 +31,7 @@ h2 Stateful by default
 p CSS Transforms aren't stateful, but bedazzle is:
 
 pre
-    | // find the box
+    | // move the box right, and then move and rotate
     | bedazzle('.box')
     |   .move('x', 100)
     |   .run('go', function() {
@@ -39,3 +39,23 @@ pre
     |           .move('r', 180)
     |           .run('go');
     |   });
+
+p And the same again, but terse:
+
+pre
+    | // move the box right, and then move and rotate (again)
+    | bedazzle('.box', 'x100 go x100 r180 go');
+
+h2 Undo Things
+
+p Want to go back?  Well, you can:
+
+pre
+    | // move as before, but then undo
+    | bedazzle('.box', 'x100 go x100 r180 go undo go undo go');
+
+:markdown
+    ## More to Come
+
+    Bedazzle is currently a proof of concept with limited browser support. If
+    you have any requests or suggestions, then [get in touch](http://twitter.com/DamonOehlman).
