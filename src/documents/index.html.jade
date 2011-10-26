@@ -28,7 +28,7 @@ pre
 
 h2 Stateful by default
 
-p CSS Transforms aren't stateful, but bedazzle is:
+p CSS Transforms aren't stateful (nor should they be), but bedazzle is:
 
 pre
     | // move the box right, and then move and rotate
@@ -52,7 +52,23 @@ p Want to go back?  Well, you can:
 
 pre
     | // move as before, but then undo
-    | bedazzle('.box', 'x100 go x100 r180 go undo go undo go');
+    | bedazzle('.box', 'x100 opacity0.5 go x100 r180 go undo go undo go');
+
+
+:markdown
+    ## Customize Transitions
+
+    Bedazzle assumes a `1s linear` (boring).  You can change this by 
+    passing options:
+
+pre
+    | // bedazzle with easing
+    | bedazzle(
+    |   '.box',
+    |   'x100 go x100 r180 go undo go undo go', {
+    |       transition: '0.5s ease-in-out'
+    |   }
+    |);
 
 :markdown
     ## More to Come

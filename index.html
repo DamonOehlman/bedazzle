@@ -6,7 +6,7 @@ bedazzle('.box')
   .run('go');
 </pre><h2>Feel Free to be Terse</h2><p>Bedazzle doesn't mind if you prefer typing less characters:</p><pre>// move the box from 0 to 100
 bedazzle('.box', 'x100 go');
-</pre><h2>Stateful by default</h2><p>CSS Transforms aren't stateful, but bedazzle is:</p><pre>// move the box right, and then move and rotate
+</pre><h2>Stateful by default</h2><p>CSS Transforms aren't stateful (nor should they be), but bedazzle is:</p><pre>// move the box right, and then move and rotate
 bedazzle('.box')
   .move('x', 100)
   .run('go', function() {
@@ -17,7 +17,17 @@ bedazzle('.box')
 </pre><p>And the same again, but terse:</p><pre>// move the box right, and then move and rotate (again)
 bedazzle('.box', 'x100 go x100 r180 go');
 </pre><h2>Undo Things</h2><p>Want to go back?  Well, you can:</p><pre>// move as before, but then undo
-bedazzle('.box', 'x100 go x100 r180 go undo go undo go');
+bedazzle('.box', 'x100 opacity0.5 go x100 r180 go undo go undo go');
+</pre><h2>Customize Transitions</h2>
+
+<p>Bedazzle assumes a <code>1s linear</code> (boring).  You can change this by 
+passing options:</p><pre>// bedazzle with easing
+bedazzle(
+  '.box',
+  'x100 go x100 r180 go undo go undo go', {
+      transition: '0.5s ease-in-out'
+  }
+);
 </pre><h2>More to Come</h2>
 
 <p>Bedazzle is currently a proof of concept with limited browser support. If
