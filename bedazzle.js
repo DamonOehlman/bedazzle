@@ -60,6 +60,7 @@ var bedazzle = (function() {
             opacity: 1
         },
         reSpace = /\s+/,
+        reScriptBedazzle = /.*?\/bedazzle$/i,
         reCommaSep = /\s*?\,\s*/,
         reTransition = /([\w\-]+)\s*(.*)/,
         transEndEvent;
@@ -305,30 +306,33 @@ var bedazzle = (function() {
                     }
                 };
                 
-            // iterate through the elements and apply the properties
-            for (ii = 0; ii < elements.length; ii++) {
-                var updatedProps = getUpdatedProps(elements[ii]);
-                
-                // FIXME: hacky
-                if (ii === 0) {
-                    transitionProps = prefixProps(updatedProps, 'css');
-                }
-                
-                // apply the transition
-                applyTransitions(elements[ii], prefixProps(updatedProps, 'css'), transition);
-                
-                // update the properties
-                for (key in updatedProps) {
-                    if (key) {
-                        elements[ii].style[getBrowserProp(key).dom] = updatedProps[key];
-                    }
-                }
-            } // for
-            
             // watch for the transition end event on the first item
             if (elements[0]) {
                 elements[0].addEventListener(transEndEvent, transitionEnd, false);
             }
+            
+            // on the next tick update the properties
+            setTimeout(function() {
+                // iterate through the elements and apply the properties
+                for (ii = 0; ii < elements.length; ii++) {
+                    var updatedProps = getUpdatedProps(elements[ii]);
+
+                    // FIXME: hacky
+                    if (ii === 0) {
+                        transitionProps = prefixProps(updatedProps, 'css');
+                    }
+
+                    // apply the transition
+                    applyTransitions(elements[ii], prefixProps(updatedProps, 'css'), transition);
+
+                    // update the properties
+                    for (key in updatedProps) {
+                        if (key) {
+                            elements[ii].style[getBrowserProp(key).dom] = updatedProps[key];
+                        }
+                    }
+                } // for
+            }, 0);
         } // processProperties
         
         function updatePropData(name, value) {
@@ -381,7 +385,24 @@ var bedazzle = (function() {
                 walkChain(items.slice(1), transition);
             } // if..else
         } // walkChain
-
+        
+        // exports 
+        
+        function findScripts() {
+            var scripts = document.scripts || [];
+            
+            for (var ii = 0; ii < scripts.length; ii++) {
+                // if the script is a bedazzle script, then parse it
+                if (reScriptBedazzle.test(scripts[ii].type)) {
+                    parse(scripts[ii].innerText);
+                }
+            }
+        } // findScripts
+        
+        function parse(text) {
+            
+        } // parse
+        
         function run(prop, propVal) {
             if (typeof propVal == 'function') {
                 processCommands(prop.split(reSpace), propVal);
@@ -451,6 +472,9 @@ var bedazzle = (function() {
             } // if
         } // if
 
+        // find the bedazzle scripts
+        findScripts();
+
         return dazzler;
     };
     
@@ -458,8 +482,6 @@ var bedazzle = (function() {
     if (typeof Modernizr != 'undefined') {
         transforms3d = Modernizr.csstransforms3d;
     }
-    
-    // on load look for bedazzle scripts
     
     return _bedazzle;
 })();

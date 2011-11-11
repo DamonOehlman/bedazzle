@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Basic Demo</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=no;"/>
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="red" />    
+<style type="text/css">
+div.box {
+    width: 40px;
+    height: 40px;
+    background: red;
+	float: left;
+}
+</style>
+</head>
+<body>
+	<h1>Page Header</h1>
+	<div id="container">
+	</div>
+	<script src="../bedazzle.js"></script>
+	<script>
+	var container = document.getElementById('container');
+	
+	for (var ii = 500; ii--; ) {
+		var box = document.createElement('div');
+		box.className = 'box';
+		
+		container.appendChild(box);
+	}
+	
+	bedazzle('.box', '', { transition: '0.5s ease-in-out'})
+		.run('r90 scale0.5 opacity:0.5 go undo go');
+	</script>
+</body>
+</html>
