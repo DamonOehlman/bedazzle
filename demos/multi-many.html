@@ -8,8 +8,9 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="red" />    
 <style type="text/css">
 div.box {
-    width: 40px;
-    height: 40px;
+    width: 30px;
+    height: 30px;
+	margin: 1px;
     background: red;
 	float: left;
 }
@@ -21,17 +22,32 @@ div.box {
 	</div>
 	<script src="../bedazzle.js"></script>
 	<script>
-	var container = document.getElementById('container');
+	var container = document.getElementById('container'),
+		opts = {
+			transition: '0.8s ease-in-out'
+		};
 	
-	for (var ii = 500; ii--; ) {
+	for (var ii = 250; ii--; ) {
 		var box = document.createElement('div');
 		box.className = 'box';
+		
+		if (ii % 2 === 0) {
+			box.className += ' spinner';
+		}
+		else {
+			box.className += ' reverser';
+		}
+		
+		if (ii % 4 === 0) {
+			box.className += ' fader';
+		}
 		
 		container.appendChild(box);
 	}
 	
-	bedazzle('.box', '', { transition: '0.5s ease-in-out'})
-		.run('r90 scale0.5 opacity:0.5 go undo go');
+	bedazzle('.fader', 'opacity0.5 go undo go', opts);
+	bedazzle('.spinner', 'scale0.5 r135 go undo go', opts);
+	bedazzle('.reverser', 'scale0.5 r-135 go undo go', opts);
 	</script>
 </body>
 </html>
