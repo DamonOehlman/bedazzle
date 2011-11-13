@@ -25,5 +25,5 @@ TransitionListener.prototype.fire = function(evt) {
 };
 
 TransitionListener.prototype.run = function(handler) {
-    setTimeout(handler, 5);
+    setTimeout(handler, 0);
 };

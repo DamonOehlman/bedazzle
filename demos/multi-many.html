@@ -7,35 +7,39 @@
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="red" />    
 <style type="text/css">
-div.box {
-    width: 30px;
-    height: 30px;
+#container {
+	-webkit-transform-style: preserve-3d;
+	-webkit-perspective: 1000;
+}
+
+.box {
+    width: 40px;
 	margin: 1px;
     background: red;
 	float: left;
+	text-align: center;
+	padding: 10px 0;
 }
 </style>
 </head>
 <body>
-	<h1>Page Header</h1>
 	<div id="container">
 	</div>
+	<script src="modernizr.custom.46588.js"></script>
 	<script src="../bedazzle.js"></script>
 	<script>
 	var container = document.getElementById('container'),
 		opts = {
-			transition: '0.8s ease-in-out'
+			transition: '1s ease-in'
 		};
 	
-	for (var ii = 250; ii--; ) {
+	for (var ii = 0; ii < 200; ii++) {
 		var box = document.createElement('div');
 		box.className = 'box';
+		box.innerText = ii;
 		
 		if (ii % 2 === 0) {
 			box.className += ' spinner';
-		}
-		else {
-			box.className += ' reverser';
 		}
 		
 		if (ii % 4 === 0) {
@@ -46,8 +50,8 @@ div.box {
 	}
 	
 	bedazzle('.fader', 'opacity0.5 go undo go', opts);
-	bedazzle('.spinner', 'scale0.5 r135 go undo go', opts);
-	bedazzle('.reverser', 'scale0.5 r-135 go undo go', opts);
+	bedazzle('.spinner', 'ry-180 go undo go', opts);
+	bedazzle('.scaler', 'scale0.5 go undo go', opts);
 	</script>
 </body>
 </html>

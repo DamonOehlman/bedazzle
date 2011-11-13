@@ -60,7 +60,7 @@ var bedazzle = (function() {
     };
     
     TransitionListener.prototype.run = function(handler) {
-        setTimeout(handler, 5);
+        setTimeout(handler, 0);
     };
 
     
@@ -503,7 +503,7 @@ var bedazzle = (function() {
             elements = [elements];
         } // if..else
 
-        if (elements) {
+        if (elements && elements[0]) {
             listener = _getListener(elements);
             
             // apply the requested action

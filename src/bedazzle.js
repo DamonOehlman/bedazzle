@@ -442,7 +442,7 @@ var bedazzle = (function() {
             elements = [elements];
         } // if..else
 
-        if (elements) {
+        if (elements && elements[0]) {
             listener = _getListener(elements);
             
             // apply the requested action
