@@ -1,6 +1,6 @@
 var bedazzle = (function() {
     
-    //= cog!parseprops
+    //= github://DamonOehlman/cog/cogs/parseprops
     //= helpers/listener
     
     // initialise property mappings
