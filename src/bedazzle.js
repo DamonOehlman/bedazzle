@@ -1,96 +1,27 @@
 var bedazzle = (function() {
     
-    //= github://DamonOehlman/cog/cogs/parseprops
-    //= helpers/listener
+    //= block://sidelab/parseProps
+    //= github://DamonOehlman/aftershock/aftershock.js
     
     // initialise property mappings
-    var
-    pMap = {
-        rotate: 'r'
-    },
-    prefixes = ['', '-webkit-', '-moz-', '-o-'],
-    domPrefixes = ['', 'Webkit', 'Moz', 'O'],
-    prefixCount = prefixes.length,
-    browserProps = {},
-    transEndEventNames = {
-        '-webkit-transition' : 'webkitTransitionEnd',
-        '-moz-transition'    : 'transitionend',
-        '-o-transition'      : 'oTransitionEnd',
-        'transition'         : 'transitionEnd'
-    },
-    transformProps = ['x', 'y', 'z', 'r', 'ry', 'rz', 'scale'],
-    transformPropCount = transformProps.length,
-    transformParsers = [
-        { regex: /translate\((\d+)px\,\s+(\d+)px\)/, x: 1, y: 2 }
-    ],
-    transformParserCount = transformParsers.length,
-    transforms3d = false,
-    multiplicatives = {
-        scale: 1,
-        opacity: 1
-    },
-    reSpace = /\s+/,
-    reScriptBedazzle = /.*?\/bedazzle$/i,
-    reCommaSep = /\s*?\,\s*/,
-    reTransition = /([\w\-]+)\s*(.*)/,
-    transEndEvent,
-    elementCounter = 0,
-    listeners = {},
+    var getBrowserProp = aftershock.getBrowserProp,
+        transformProps = ['x', 'y', 'z', 'r', 'ry', 'rz', 'scale'],
+        transformPropCount = transformProps.length,
+        transformParsers = [
+            { regex: /translate\((\d+)px\,\s+(\d+)px\)/, x: 1, y: 2 }
+        ],
+        transformParserCount = transformParsers.length,
+        transforms3d = false,
+        multiplicatives = {
+            scale: 1,
+            opacity: 1
+        },
+        reSpace = /\s+/,
+        reScriptBedazzle = /.*?\/bedazzle$/i,
+        reCommaSep = /\s*?\,\s*/,
+        reTransition = /([\w\-]+)\s*(.*)/,
+        elementCounter = 0,
         
-    _getBrowserProp = function(propName, el) {
-        if (browserProps[propName]) {
-            return browserProps[propName];
-        }
-        
-        // map the property name if applicable
-        var browserProp = {
-                css: pMap[propName] || propName,
-                dom: pMap[propName] || propName
-            },
-            testProps = [], ii;
-            
-        // iterate through the prefixes and look for the relevant property
-        for (ii = 0; ii < prefixCount; ii++) {
-            testProps.push({
-                css: prefixes[ii] + propName,
-                dom: ii === 0 ? propName : domPrefixes[ii] + propName.slice(0, 1).toUpperCase() + propName.slice(1)
-            });
-        } // for
-        
-        
-        for (ii = 0; ii < testProps.length; ii++) {
-            if (typeof el.style[testProps[ii].dom] != 'undefined') {
-                browserProp = testProps[ii];
-                break;
-            }
-        }
-        
-        return browserProps[propName] = browserProp;
-    },
-    
-    _getListener = function(elements) {
-        var el = elements[0];
-        
-        if (el) {
-            el.id = el.id || ('el_' + elementCounter++);
-        }
-        
-        if (! listeners[el.id]) {
-            // determine the transitionend event name
-            transEndEvent = transEndEvent || transEndEventNames[_getBrowserProp('transition', el).css];
-
-            // create the control element
-            listeners[el.id] = new TransitionListener(el);
-
-            // capture transition end evens
-            el.addEventListener(transEndEvent, function(evt) {
-                listeners[el.id].fire.call(listeners[el.id], evt);
-            }, false);
-        }
-        
-        return listeners[el.id];
-    },
-    
     _bedazzle = function(elements, dscript, opts, scope) {
 
         // initialise options
@@ -109,7 +40,7 @@ var bedazzle = (function() {
                 // add move aliases
                 move: run
             },
-            listener,
+            // listener,
             commandHandlers = {
                 undo: function(callback) {
                     isUndo = true;
@@ -142,7 +73,7 @@ var bedazzle = (function() {
         
         function applyTransitions(element, transitionProps, transition) {
             var transitions = [],
-                propName = _getBrowserProp('transition', elements[0]).dom,
+                propName = getBrowserProp('transition', elements[0]).dom,
                 existing = (element.style[propName] || '').split(reCommaSep),
                 ii, key, match;
                 
@@ -225,7 +156,7 @@ var bedazzle = (function() {
         } // getUpdatedProps        
         
         function parseTransform(element) {
-            var transform = element.style[_getBrowserProp('transform', elements[0]).dom] || '',
+            var transform = element.style[getBrowserProp('transform', elements[0]).dom] || '',
                 ii, match, key, parser, 
                 data = {};
                 
@@ -250,7 +181,7 @@ var bedazzle = (function() {
             var out = {};
             
             for (var key in props) {
-                out[_getBrowserProp(key, elements[0])[attr || 'dom']] = props[key];
+                out[getBrowserProp(key, elements[0])[attr || 'dom']] = props[key];
             }
             
             return out;
@@ -267,7 +198,7 @@ var bedazzle = (function() {
                 }
                 // otherwise, process the property
                 else {
-                    var data = _parseprops(command);
+                    var data = parseProps(command);
                     for (var key in data) {
                         addToChain(key, data[key]);
                     } // for
@@ -297,17 +228,22 @@ var bedazzle = (function() {
                         // update the properties
                         for (key in updatedProps) {
                             if (key) {
-                                elements[ii].style[_getBrowserProp(key, elements[0]).dom] = updatedProps[key];
+                                elements[ii].style[getBrowserProp(key, elements[0]).dom] = updatedProps[key];
                             }
                         }
                     } // for
                 };
 
+            // fire the callback once the transition has completed
+            aftershock(elements, callback);
+            
+            /*
             // add the new listener
             listener.add(
                 callback, 
                 prefixProps(getUpdatedProps(listener.element), 'css')
             );
+            */
             
             // TODO: Moz prefers no settimeout, but chrome seems to require it...
             setTimeout(applyProps, 0);
@@ -315,7 +251,7 @@ var bedazzle = (function() {
         } // processProperties
         
         function updatePropData(name, value) {
-            var browserProp = _getBrowserProp(name, elements[0]), newVal = value,
+            var browserProp = getBrowserProp(name, elements[0]), newVal = value,
                 currentValue = propData[browserProp.dom];
             
             if (typeof currentValue != 'undefined' && (! isNaN(currentValue) || isNaN(value))) {
@@ -401,7 +337,7 @@ var bedazzle = (function() {
                     command(prop, propVal);
                 }
                 else {
-                    props = _parseprops(prop);
+                    props = parseProps(prop);
 
                     // if we have properties, then add to the chain, otherwise
                     // check for a state changer
@@ -443,7 +379,7 @@ var bedazzle = (function() {
         } // if..else
 
         if (elements && elements[0]) {
-            listener = _getListener(elements);
+            // listener = _getListener(elements);
             
             // apply the requested action
             if (dscript) {
