@@ -67,11 +67,13 @@ var bedazzle = (function() {
         this.elements = elements;
         this.rtid = 0;
         this.state = {};
+        this.done = [];
         this.queued = [];
-        
+    
         // set some configurable options
-        this.opts = {
-            frameDelay: 1000 / 60
+        this._opts = {
+            frameDelay: 1000 / 60,
+            immediate: false
         };
     }
     
@@ -79,7 +81,8 @@ var bedazzle = (function() {
         _applyChanges: function() {
             var ii, element, key, styleKey,
                 props = this.queued.shift(),
-                transitionDuration, transitioners = [];
+                transitionDuration, transitioners = [],
+                timeout = 0;
                 
             // if we don't have properties to apply, return
             if (! props) {
@@ -96,6 +99,7 @@ var bedazzle = (function() {
                 
                 // determine whether we have a transition on the element or not
                 if (transitionDuration) {
+                    timeout = Math.max(timeout, transitionDuration * 1000);
                     transitioners.push(this.elements[ii]);
                 }
                 
@@ -113,43 +117,59 @@ var bedazzle = (function() {
                 element.set(props.elements[ii]);
             }
             
-            this._next(transitioners, props.callbacks || []);
+            this.done.push(props);
+            this._next(transitioners, timeout, props.callbacks || []);
         },
         
         _changed: function() {
             var bedazzler = this;
-    
-            clearTimeout(this.rtid);
-            this.rtid = setTimeout(function() {
-                bedazzler._applyChanges();
-            }, this.opts.frameDelay || 0);
+            
+            if (this._opts.immediate) {
+                this._applyChanges();
+            }
+            else {
+                clearTimeout(this.rtid);
+                this.rtid = setTimeout(function() {
+                    bedazzler._applyChanges();
+                }, this._opts.frameDelay || 0);
+            }
             
             return this;
         },
         
-        _next: function(transitioners, callbacks) {
+        _next: function(transitioners, timeout, callbacks) {
             var transitionsRemaining = transitioners.length,
                 bedazzler = this;
-    
+                
+            function runNext() {
+                // trigger the callbacks
+                _.each(callbacks, function(callback) {
+                    if (typeof callback == 'function') {
+                        callback.call(bedazzler, bedazzler.elements);
+                    }
+                });
+                
+                // trigger the next update cycle
+                bedazzler._changed();
+            }
+                
+            if (transitioners.length) {
+                setTimeout(runNext, timeout || 0);
+            }
+            else if (this.queued.length > 0) {
+                runNext();
+            }
+                
+            /*
+                
             // if we have a transition, then on transition end, apply the changes
             if (transitionsRemaining && typeof aftershock == 'function') {
                 transitioners.forEach(function(transitioner) {
-                    var listener = aftershock(transitioner, function() {
+                    var listener = aftershock(transitioner, { timeout: timeout }, function() {
                         transitionsRemaining--;
                         
                         if (transitionsRemaining <= 0) {
-                            // stop the aftershock listener
-                            listener.stop();
-    
-                            // trigger the callbacks
-                            _.each(callbacks, function(callback) {
-                                if (typeof callback == 'function') {
-                                    callback.call(bedazzler, bedazzler.elements);
-                                }
-                            });
-                            
-                            // trigger the next update cycle
-                            bedazzler._changed();
+                            runNext();
                         }
                     });
                 });
@@ -157,10 +177,28 @@ var bedazzle = (function() {
             else if (this.queued.length > 0) {
                 this._applyChanges();
             }
+            */
         },
         
         end: function(callback) {
             this.props.callbacks.push(callback);
+            
+            return this;
+        },
+        
+        loop: function() {
+            var bedazzler = this;
+            
+            this.end(function() {
+                bedazzler.queued = [].concat(bedazzler.done);
+                bedazzler.done = [];
+    
+                bedazzler._changed();
+            });
+        },
+        
+        opts: function(opts) {
+            _.extend(this._opts, opts);
             
             return this;
         },
@@ -254,32 +292,41 @@ var bedazzle = (function() {
     // create the prototype methods for each of the identified
     // transform functions
     _.each(transformProps, function(key) {
-        var targetKey = key,
+        var targetKeys = [key],
             targetSection = 'translate',
             reRotate = /^r(\w)?(?:otate)?$/,
-            reScale = /^scale%/;
+            reScale = /^scale(X|Y|Z)?$/;
         
         if (reRotate.test(key)) {
-            targetKey = RegExp.$1 || 'z';
+            targetKeys = [RegExp.$1 || 'z'];
             targetSection = 'rotate';
         }
         
         if (reScale.test(key)) {
-            targetKey = 'x';
+            if (RegExp.$1) {
+                targetKeys = RegExp.$1.toLowerCase();
+            }
+            else {
+                targetKeys = ['x', 'y'];
+            }
+            
             targetSection = 'scale';
         }
         
         Bedazzler.prototype[key] = function(value, absolute) {
-            var xyz = this.props.transform[targetSection],
+            var xyz = this.props.transform[targetSection], currentVal;
+            
+            targetKeys.forEach(function(targetKey) {
                 currentVal = xyz[targetKey].value || 0;
-                
-            // if we are applying an absolute value, then 
-            if (absolute) {
-                xyz[targetKey].value = value - currentVal;
-            }
-            else {
-                xyz[targetKey].value = currentVal + value;
-            }
+    
+                // if we are applying an absolute value, then 
+                if (absolute) {
+                    xyz[targetKey].value = value - currentVal;
+                }
+                else {
+                    xyz[targetKey].value = currentVal + value;
+                }
+            });
     
             return this._changed();
         };

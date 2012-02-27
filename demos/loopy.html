@@ -6,22 +6,25 @@
 <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=no;"/>
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="red" />
-<link rel="stylesheet" type="text/css" href="cards.css" />
+<link rel="stylesheet" type="text/css" href="demos.css" />
 <script src="js/modernizr.js"></script>
 </head>
 <body>
-    <div id="cardtable">
-        <div id="cardtarget"></div>
-    </div>
-    <div id="player1">
-        <div class="hand"></div>
-    </div>
+	<div class="box car spinner"></div>
+
     <script src="js/jquery.min.js"></script>
     <script src="js/underscore.js"></script>
     <script src="js/stylar.js"></script>
     <script src="js/ratchet.js"></script>
     <script src="../bedazzle.js"></script>
-    <script src="js/cards.js"></script>
-    <script src="js/cardgame-sample-1.js"></script>
+    <style type="text/css">
+    .spinner {
+        -webkit-transition: all linear 1s;
+    }
+    </style>
+	<script>
+	bedazzle('.spinner')
+	    .rotate(180).loop();
+	</script>
 </body>
 </html>

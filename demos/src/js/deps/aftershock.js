@@ -1,1 +1,0 @@
-//= github://DamonOehlman/aftershock/aftershock.js
