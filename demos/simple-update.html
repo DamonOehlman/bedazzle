@@ -15,18 +15,31 @@
     <div class="box"></div>
     <div class="box"></div>
     <div class="box"></div>
+    <div style="clear: left;"></div>
+
+    <div class="box"></div>
+    <div class="box"></div>
+    <div class="box"></div>
+    <div class="box"></div>
+    <div class="box"></div>
+    <div style="clear: left;"></div>
+
+    <div class="box"></div>
+    <div class="box"></div>
+    <div class="box"></div>
+    <div class="box"></div>
+    <div class="box"></div>
 
     <script src="js/jquery.min.js"></script>
-    <script src="js/underscore.js"></script>
     <script src="js/stylar.js"></script>
     <script src="js/ratchet.js"></script>
     <script src="js/aftershock.js"></script>
     <script src="../bedazzle.js"></script>
     <script>
     bedazzle('.box')
-        .frame.x(200).y(200).rotate(-45)
-        .frame.x(-200).opacity(0.2)
-        .frame.x(200).y(50).rotate(315).height(-100).set('opacity', 1);
+        .frame.update('x200 y200 rotate-360')
+        .frame.update('x-200')
+        .frame.update('x200 y50 rotate360');
     </script>
 </body>
 </html>

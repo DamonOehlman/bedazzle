@@ -1,3 +1,6 @@
+//+ ratchet
+//+ stylar
+
 var bedazzle = (function() {
     
     var parseProps = (function() {
@@ -33,525 +36,250 @@ var bedazzle = (function() {
         };
     })();
 
-    // Aftershock function provides a cross-browser wrapper to transitionEnd events.
-    //
-    //      aftershock(elements, opts*, callback)
-    // 
-    // ### Parameters:
-    // 
-    // - elements - the elements (or single element) that we will bind the event listener to
-    // - opts - aftershock options, which can be omitted
-    // - callback - the handler to fire when a transitionEnd event is detected
-    // 
-    // ### Options
-    // 
-    // The following options are supported by aftershock:
-    // 
-    // - mindiff (default: 10ms) - The amount of time between events on elements to be considered
-    //     a discrete transitionEnd event for the group of elements being watched.  In my normal usage
-    //     I really only want to know when the group of elements transitioning have finished not each
-    //     discrete element
-    // 
-    // - perProperty (default: false) - Whether or not discrete events should be fired when different
-    //     properties have been transitioned.
-    // 
-    var aftershock = (function() {
-        var transEndEventNames = {
-                '-webkit-transition' : 'webkitTransitionEnd',
-                '-moz-transition'    : 'transitionend',
-                '-o-transition'      : 'oTransitionEnd',
-                'transition'         : 'transitionEnd'
-            },
-            transEndEvent;
-            
-        /*
-         * ## getBrowserProp(propName, testElement, customMappings)
-         * 
-         * This function is used to return the current vendor specific property for the requested
-         * property. The property is determined by iterating through dom prefixes on the element
-         * and looking for support of the property on the elements style attribute.  If the version
-         * of the browser has support for the property in it's raw form then that will be returned
-         * first (as it is tested first).
-         */
-        var getBrowserProp = (function() {
-            var knownProps = {},
-                prefixes = ['', '-webkit-', '-moz-', '-o-'],
-                domPrefixes = ['', 'Webkit', 'Moz', 'O'],
-                prefixCount = prefixes.length;
-                
-            
-            return function(propName, testEl, mappings) {
-                var ii, testProps = [], browserProp;
-                
-                // if we already know the property mapping, then return it
-                if (knownProps[propName]) return knownProps[propName];
-                
-                // ensure the mappings are valid
-                mappings = mappings || {};
-                
-                // initialise the browser property to the default property, run through the custom mappings
-                browserProp = {
-                    css: mappings[propName] || propName,
-                    dom: mappings[propName] || propName
-                };
-                
-                // create the test properties
-                for (ii = 0; ii < prefixCount; ii++) {
-                    testProps.push({
-                        css: prefixes[ii] + propName,
-                        dom: ii === 0 ? propName : domPrefixes[ii] + propName.slice(0, 1).toUpperCase() + propName.slice(1)
-                    });
-                } // for
-                
-                // check for the existence of the property on the element
-                for (ii = 0; ii < testProps.length; ii++) {
-                    if (typeof testEl.style[testProps[ii].dom] != 'undefined') {
-                        browserProp = testProps[ii];
-                        break;
-                    }
-                }
-                
-                // update the known props and return the property
-                return knownProps[propName] = browserProp;
-            };
-        })();
     
+    var modAvail = typeof Modernizr != 'undefined',
+        transforms = modAvail && Modernizr.csstransforms && typeof ratchet != 'undefined',
+        transforms3d = transforms && Modernizr.csstransforms3d,
+        reStripValue = /^\-?\d+/,
         
-        function _aftershock(elements, opts, callback) {
-            
-            var ii,
-                firedTick = {};
-            
-            function delegator(evt) {
-                var tick = new Date().getTime(),
-                    evtName = opts.perProperty ? evt.propertyName : 'transition',
-                    tickDiff = tick - (firedTick[evtName] || 0);
-                    
-                // if the tick difference is great enough, then we have a discrete event, so fire.
-                if (tickDiff >= opts.mindiff) {
-                    if (callback) {
-                        callback.call(this, evt);
-                    }
-                    
-                    // update the fired tick
-                    firedTick[evtName] = tick;
-                }
-            } // delegator
-            
-            // if we don't have elements, return
-            if (! elements) return null;
-            
-            // if the opts is a function, then it's probably the callback
-            if (typeof opts == 'function' && arguments.length == 2) {
-                callback = opts;
-                opts = {};
-            }
-            
-            // ensure we have options
-            opts = opts || {};
-            opts.mindiff = opts.mindiff || 10;
-    
-            // elements is not an array, then make it one
-            if (elements && (typeof elements.length == 'undefined')) {
-                elements = [elements];
-            }
-    
-            // if we have at least one element and no transEndEvent name, find it
-            if (elements.length > 0 && (! transEndEvent)) {
-                transEndEvent = transEndEventNames[getBrowserProp('transition', elements[0]).css];
-            }
-            
-            // add the listener to each of the elements
-            for (ii = elements.length; ii--;  ) {
-                elements[ii].addEventListener(transEndEvent, delegator);
-            }
-            
-            return {
-                stop: function() {
-                    for (ii = elements.length; ii--; ) {
-                        elements[ii].removeEventListener(transEndEvent, delegator);
-                    }
-                }
-            };
-        };
+        // define the property map
+        transformProps = transforms ? [
+            'x',
+            'y',
+            'z',
+            'rotate',
+            'rx',
+            'ry',
+            'rz',
+            'scale'
+        ] : [],
         
-        if (typeof jQuery != 'undefined') {
-            jQuery.fn.aftershock = function(opts, callback) {
-                return _aftershock.apply(this, [this].concat(Array.prototype.slice.apply(arguments)));
-            };
-        }
-    
-        // export the get browser prop utility function for other libraries to use
-        _aftershock.getBrowserProp = getBrowserProp;
-        
-        return _aftershock;
-    })();
-
-    
-    // initialise property mappings
-    var getBrowserProp = aftershock.getBrowserProp,
-        transformProps = ['x', 'y', 'z', 'r', 'ry', 'rz', 'scale'],
-        transformPropCount = transformProps.length,
-        transformParsers = [
-            { regex: /translate\((\d+)px\,\s+(\d+)px\)/, x: 1, y: 2 }
+        percentageProps = [
+            'opacity'
         ],
-        transformParserCount = transformParsers.length,
-        transforms3d = false,
-        multiplicatives = {
-            scale: 1,
-            opacity: 1
+        
+        standardProps = [
+            'height',
+            'width'
+        ].concat(transforms ? [] : ['x', 'y']);    
+
+    function Bedazzler(elements) {
+        this.elements = elements;
+        this.rtid = 0;
+        this.state = {};
+        this.queued = [];
+    }
+    
+    Bedazzler.prototype = {
+        applyChanges: function() {
+            var ii, element, key, styleKey,
+                props = this.queued.shift(),
+                bedazzler = this,
+                transitionDuration, transitioners = [], transitionsRemaining;
+                
+            // if we don't have properties to apply, return
+            if (! props) {
+                return;
+            }
+            
+            // iterate through the elements and update
+            for (ii = this.elements.length; ii--; ) {
+                // get a stylar reference for the target element
+                element = stylar(this.elements[ii]);
+                
+                // determine whether the current element has a transition on it
+                transitionDuration = parseFloat(element.get('transition-duration'));
+                
+                // determine whether we have a transition on the element or not
+                if (transitionDuration) {
+                    transitioners.push(this.elements[ii]);
+                }
+                
+                // if we have a transform then apply it to the element
+                if (props.transform) {
+                    // read the transform
+                    var currentTransform = element.get('transform', true),
+                        newTransform = currentTransform ? ratchet(currentTransform).add(props.transform) : props.transform;
+                    
+                    // update the transform taking into account the current transform
+                    element.set('transform', newTransform.toString({ all: true }));
+                }
+                
+                // iterate through the values and apply then to the element
+                element.set(props.elements[ii]);
+            }
+            
+            // if we have a transition, then on transition end, apply the changes
+            transitionsRemaining = transitioners.length;
+            if (transitionsRemaining && typeof aftershock == 'function') {
+                transitioners.forEach(function(transitioner) {
+                    aftershock(transitioner, function() {
+                        transitionsRemaining--;
+                        
+                        if (transitionsRemaining <= 0) {
+                            bedazzler.changed();
+                        }
+                    });
+                });
+            }
+            else if (this.queued.length > 0) {
+                this.applyChanges();
+            }
         },
-        reSpace = /\s+/,
-        reScriptBedazzle = /.*?\/bedazzle$/i,
-        reCommaSep = /\s*?\,\s*/,
-        reTransition = /([\w\-]+)\s*(.*)/,
-        elementCounter = 0,
         
-    _bedazzle = function(elements, dscript, opts, scope) {
-
-        // initialise options
-        opts = opts || {};
-        opts.transition = opts.transition || '1s linear';
-
-        // internals
-
-        var chain = [],
-            undoStack = [],
-            propData = {},
-            changed = {},
-            isUndo = false,
-            dazzler = {
-                run: run,
-                // add move aliases
-                move: run
-            },
-            // listener,
-            commandHandlers = {
-                undo: function(callback) {
-                    isUndo = true;
-                    chain = [].concat(undoStack.pop());
-                    
-                    callback();
-                },
-                
-                go: run
-            };
-
-        function addToChain(prop, propValue) {
-            if (typeof propValue != 'undefined') {
-                chain.push({
-                    p: prop,
-                    v: propValue
-                });
+        changed: function() {
+            var bedazzler = this;
+    
+            clearTimeout(this.rtid);
+            this.rtid = setTimeout(function() {
+                bedazzler.applyChanges();
+            }, 1000 / 60);
+            
+            return this;
+        },
+        
+        set: function(name, value) {
+            var props = this.props;
+            
+            if (name == 'transform') {
+                props.transform = ratchet(value);
             }
             else {
-                for (var key in prop) {
-                    if (prop.hasOwnProperty(key)) {
-                        chain.push({
-                            p: key,
-                            v: prop[key]
-                        });
+                // iterate through the elements and set the values for the named property
+                for (var ii = this.elements.length; ii--; ) {
+                    props.elements[ii][name] = value;
+                }
+            }
+            
+            return this;
+        },
+        
+        update: function(props) {
+            if (typeof props == 'string' || props instanceof String) {
+                props = parseProps(props);
+            }
+    
+            // update the state of each of the properties
+            if (props) {
+                for (var key in props) {
+                    if (this[key]) {
+                        this[key](parseInt(props[key], 10) || props[key]);
                     }
                 }
             }
-        } // addToChain
-        
-        function applyTransitions(element, transitionProps, transition) {
-            var transitions = [],
-                propName = getBrowserProp('transition', elements[0]).dom,
-                existing = (element.style[propName] || '').split(reCommaSep),
-                ii, key, match;
-                
-            // iterate through the existing transitions
-            for (ii = existing.length; ii--; ) {
-                match = reTransition.exec(existing[ii]);
-                if (match) {
-                    transitionProps[match[1]] = transitionProps[match[1]] || match[2];
-                } // if
-            } // for
             
-            // read the existing transition properties
-            for (key in transitionProps) {
-                transitions.push(key + ' ' + transition);
-            } // for
+            return this;
+        }
+    };
+    
+    Object.defineProperty(Bedazzler.prototype, 'frame', { 
+        get: function () {
+            var props = {
+                transform: transforms ? new ratchet.Transform() : null,
+                elements: []
+            }, key, ii;
             
-            element.style[propName] = transitions.join(', ');
-        } // applyTransitions
-        
-        function createUndoChain(items) {
-            // create a command list based on the items listed
-            var reversed = [], ii, propName, propVal;
-            
-            for (ii = items.length; ii--; ) {
-                propName = items[ii].p;
-                propVal = items[ii].v;
-                
-                // if a numeric value, then reverse it
-                if (! isNaN(propVal)) {
-                    reversed.push({
-                        p: propName,
-                        v: multiplicatives[propName] ? 1 / propVal : -propVal
-                    });
-                } // if
-            } // for
-            
-            return reversed;
-        } // createUndoChain
-        
-        function getUpdatedProps(element) {
-            // read the transform props
-            var transformData = parseTransform(element),
-                key, elementData = {}, changedData = {};
-                
-            // iterate through the prop data and make a copy
-            for (key in propData) {
-                elementData[key] = propData[key];
-            } // for
-            
-            // now apply and transform data that hasn't been set
-            // by existing properties
-            for (key in transformData) {
-                if (transformData[key] && typeof propData[key] == 'undefined') {
-                    elementData[key] = transformData[key];
-                    changed[key] = true;
-                }
-            } // for
-            
-            // copy the property data
-            for (key in elementData) {
-                if (changed[key]) {
-                    changedData[key] = elementData[key];
-                } // if
-            } // for
-            
-            // make the transform prop
-            changedData.transform = 
-                'translate(' + (changedData.x || 0) + 'px, ' + (changedData.y || 0) + 'px) ' +
-                'rotate(' + (changedData.r || 0) + 'deg) ' +
-                (transforms3d ? 'rotateY(' + (changedData.ry || 0) + 'deg) ' : '') + 
-                'scale(' + (changedData.scale || 1) + ') ' + 
-                (transforms3d ? 'translateZ(' + (changedData.z || 0) + 'px)' : '');
-
-            // clear the transform props
-            for (var ii = 0; ii < transformPropCount; ii++) {
-                delete changedData[transformProps[ii]];
-            } // for
-            
-            return changedData;
-        } // getUpdatedProps        
-        
-        function parseTransform(element) {
-            var transform = element.style[getBrowserProp('transform', elements[0]).dom] || '',
-                ii, match, key, parser, 
-                data = {};
-                
-            // iterate through the transform parsers
-            for (ii = 0; ii < transformParserCount; ii++) {
-                parser = transformParsers[ii];
-                
-                match = parser.regex.exec(transform);
-                if (match) {
-                    for (key in parser) {
-                        if (key !== 'regex') {
-                            data[key] = match[parser[key]];
-                        }
-                    }
-                }
-            } // for
-            
-            return data;
-        } // parseTransform
-
-        function prefixProps(props, attr) {
-            var out = {};
-            
-            for (var key in props) {
-                out[getBrowserProp(key, elements[0])[attr || 'dom']] = props[key];
-            }
-            
-            return out;
-        } // prefixProps
-        
-        function processCommands(commands, callback) {
-            var command = commands[0];
-            if (command) {
-                // if it is an actual command rather than a property, then process
-                if (commandHandlers[command]) {
-                    commandHandlers[command].call(this, function() {
-                        processCommands(commands.slice(1), callback);
-                    });
-                }
-                // otherwise, process the property
-                else {
-                    var data = parseProps(command);
-                    for (var key in data) {
-                        addToChain(key, data[key]);
-                    } // for
-                    
-                    processCommands(commands.slice(1), callback);
+            // if we have current properties, then clone the values
+            if (this._props) {
+                // copy each of the elements
+                for (ii = this.elements.length; ii--; ) {
+                    props.elements[ii] = _.clone(this._props.elements[ii]) || {};
                 }
             }
-            else if (callback) {
-                callback.call(dazzler);
-            } // if..else
-        } // processCommands
-        
-        function processProperties(transition, callback) {
-            var ii, key, propName, propValue, realProps,
-                transitionComplete = false,
-                startTick = new Date().getTime(),
-                fireCount = 0,
-                
-                applyProps = function() {
-                    // iterate through the elements and apply the properties
-                    for (ii = elements.length; ii--; ) {
-                        var updatedProps = getUpdatedProps(elements[ii]);
-
-                        // apply the transition
-                        applyTransitions(elements[ii], prefixProps(updatedProps, 'css'), transition);
-
-                        // update the properties
-                        for (key in updatedProps) {
-                            if (key) {
-                                elements[ii].style[getBrowserProp(key, elements[0]).dom] = updatedProps[key];
-                            }
-                        }
-                    } // for
-                };
-
-            // fire the callback once the transition has completed
-            aftershock(elements, callback);
-            
-            /*
-            // add the new listener
-            listener.add(
-                callback, 
-                prefixProps(getUpdatedProps(listener.element), 'css')
-            );
-            */
-            
-            // TODO: Moz prefers no settimeout, but chrome seems to require it...
-            setTimeout(applyProps, 0);
-            // applyProps();
-        } // processProperties
-        
-        function updatePropData(name, value) {
-            var browserProp = getBrowserProp(name, elements[0]), newVal = value,
-                currentValue = propData[browserProp.dom];
-            
-            if (typeof currentValue != 'undefined' && (! isNaN(currentValue) || isNaN(value))) {
-                if (multiplicatives[name]) {
-                    newVal = currentValue * value;
-                }
-                else {
-                    newVal = currentValue + value;
-                }
-            } // if
-            
-            // update the property value
-            changed[name] = currentValue !== newVal;
-            propData[name] = newVal;
-        } // updatePropData
-        
-        function walkChain(items, transition) {
-            var item = items[0], match, propName, propVal;
-            
-            // if we have a function, then wait for the transition end
-            // then call the function
-            if ((! item) || typeof item == 'function') {
-                // process properties
-                processProperties(transition, function() {
-                    // create the undo chain
-                    if (! isUndo) {
-                        undoStack.push(createUndoChain(chain));
-                    } // if
-                    
-                    // reset the chain
-                    chain = [];
-                    isUndo = false;
-                    changed = {};
-                    
-                    // if we have a callback, then fire it
-                    if (item) {
-                        item.call(dazzler);
-                    } // if
-                });
-            }
-            // if we have an item, then apply the property
+            // otherwise create the new properties
             else {
-                // get the property name
-                updatePropData(item.p, item.v);
-                
-                // process the remaining items in the chain
-                walkChain(items.slice(1), transition);
-            } // if..else
-        } // walkChain
-        
-        // exports 
-        
-        function findScripts() {
-            var scripts = document.scripts || [];
+                for (ii = this.elements.length; ii--; ) {
+                    props.elements[ii] = {};
+                }
+            }
             
-            for (var ii = 0; ii < scripts.length; ii++) {
-                // if the script is a bedazzle script, then parse it
-                if (reScriptBedazzle.test(scripts[ii].type)) {
-                    parse(scripts[ii].innerText);
-                }
-            }
-        } // findScripts
+            // initialise the current properties that we are modifying
+            this.queued.push(this._props = props);
+    
+            return this;
+        },
         
-        function parse(text) {
+        configurable: true
+    });
+    
+    Object.defineProperty(Bedazzler.prototype, 'props', {
+        get: function() {
+            if (! this._props) {
+                this.frame;
+            }
             
-        } // parse
+            return this._props;
+        }
+    });
+    
+    // create the prototype methods for each of the identified
+    // transform functions
+    _.each(transformProps, function(key) {
+        var targetKey = key,
+            targetSection = 'translate',
+            reRotate = /^r(\w)?(?:otate)?$/,
+            reScale = /^scale%/;
         
-        function run(prop, propVal) {
-            if (typeof propVal == 'function') {
-                processCommands(prop.split(reSpace), propVal);
+        if (reRotate.test(key)) {
+            targetKey = RegExp.$1 || 'z';
+            targetSection = 'rotate';
+        }
+        
+        if (reScale.test(key)) {
+            targetKey = 'x';
+            targetSection = 'scale';
+        }
+        
+        Bedazzler.prototype[key] = function(value) {
+            var xyz = this.props.transform[targetSection],
+                currentVal = xyz[targetKey].value || 0;
+            
+            xyz[targetKey].value = currentVal + value;
+            return this.changed();
+        };
+    });
+    
+    // implement the non-transform percentage (opacity, etc) properties
+    _.each(percentageProps, function(key) {
+        Bedazzler.prototype[key] = function(value) {
+            for (var ii = this.elements.length; ii--; ) {
+                var targetProp = this.props.elements[ii],
+                    // get the current value, if not defined default to 1 / 100%
+                    currentVal = targetProp[key] || stylar(this.elements[ii], key) || 1;
+    
+                // multiply the current value by the new value
+                targetProp[key] = currentVal * value;
             }
-            else if (typeof propVal != 'undefined') {
-                addToChain(prop, propVal);
+            
+            return this.changed();
+        };
+    });
+    
+    // implement prototype method for the standard properties
+    _.each(standardProps, function(key) {
+        Bedazzler.prototype[key] = function(value) {
+            for (var ii = this.elements.length; ii--; ) {
+                var targetProp = this.props.elements[ii],
+                    currentVal = targetProp[key] || 
+                        stylar(this.elements[ii], key) || 
+                        '0px',
+    
+                    actualValue = parseFloat(currentVal) || 0,
+    
+                    units = value.toString().replace(reStripValue, '') || 
+                        currentVal.toString().replace(reStripValue, '') || 
+                        'px';
+    
+                targetProp[key] = (actualValue + parseFloat(value)) + units;
             }
-            else if (typeof prop == 'string' || prop instanceof String) {
-                processCommands(prop.split(reSpace), opts.callback);
-                
-                /*
-                // check if the property is a command
-                prop = extractCommands(prop, commands);
-                
-                if (command) {
-                    command(prop, propVal);
-                }
-                else {
-                    props = parseProps(prop);
+            
+            return this.changed();
+        };
+    });
+    
 
-                    // if we have properties, then add to the chain, otherwise
-                    // check for a state changer
-                    if (props) {
-                        addToChain(props);
-                    } // if
-                }
-                */
-            }
-            else if (typeof prop == 'function') {
-                walkChain(chain.concat(prop), opts.transition);
-            }
-            else if (typeof prop == 'object') {
-                addToChain(prop);
-            }
-            else {
-                var transition = (typeof this == 'string' || this instanceof String) ? 
-                        this.toString() : opts.transition;
-                
-                // walk the chain        
-                walkChain(
-                    // if we have been called with a function as this, then pass it as a callback
-                    typeof this == 'function' ? chain.concat(this) : chain, 
-                    transition
-                );
-            } // if..else
-
-            return dazzler;
-        } // dazzle
+    
+    var _bedazzle = function(elements, scope) {
 
         // check the elements
         if (typeof elements == 'string' || elements instanceof String) {
@@ -563,24 +291,13 @@ var bedazzle = (function() {
             elements = [elements];
         } // if..else
 
-        if (elements && elements[0]) {
-            // listener = _getListener(elements);
-            
-            // apply the requested action
-            if (dscript) {
-                run(dscript);
-            } // if
-        } // if
-
-        // find the bedazzle scripts
-        findScripts();
-
-        return dazzler;
+        return new Bedazzler(elements);
     };
     
-    // if we have modernizr, then do so tests
-    if (typeof Modernizr != 'undefined') {
-        transforms3d = Modernizr.csstransforms3d;
+    if (typeof jQuery != 'undefined') {
+        $.fn.bedazzle = function() {
+            return _bedazzle(this);
+        };
     }
     
     return _bedazzle;
