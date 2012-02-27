@@ -4,7 +4,7 @@ var ratchet = (function() {
         var parsedVal = parseFloat(value);
         
         this.value = isNaN(parsedVal) ? value : parsedVal;
-        this.units = typeof units != 'undefined' ? units : 'px';
+        this.units = units || '';
     }
     
     TransformValue.prototype.valueOf = function() {
@@ -33,7 +33,7 @@ var ratchet = (function() {
         this.defaultValue = opts.defaultValue || 0;
         
         // look for the default units
-        defaultUnits = typeof opts.units != 'undefined' ? opts.units : (opts.x || opts.y || opts.z || {}).units;
+        defaultUnits = (opts.x || {}).units || (opts.y || {}).units || (opts.z || {}).units || opts.units;
         
         // initialise the units
         this.units = typeof defaultUnits != 'undefined' ? defaultUnits : 'px';
@@ -218,7 +218,10 @@ var ratchet = (function() {
         return function(match) {
             var units = '', value;
             if (typeof expectUnits == 'undefined' || expectUnits) {
-                units = match[index + 1];
+                // get the units
+                // default to undefined if an empty string which means the 
+                // default units for the XYZ value type will be used
+                units = match[index + 1] || undefined;
             }
     
             // create the transform value
@@ -239,9 +242,16 @@ var ratchet = (function() {
     
     var matchers = {
             val: '(\\-?[\\d\\.]+)',
-            unit: '([^\\s]+)',
+            unit: '([^\\s]*)',
             ',': '\\,\\s*'
         },
+        
+        unitTypes = {
+            translate: 'px',
+            rotate: 'deg',
+            scale: ''
+        },
+        
         transformParsers = {
             translate: [
                 // standard 2d translation
@@ -322,6 +332,7 @@ var ratchet = (function() {
                 // reset the test string to the input string
                 testString = inputString;
                 
+                // get the initial match
                 match = rule.regex.exec(testString);
                 
                 while (match) {
@@ -339,6 +350,9 @@ var ratchet = (function() {
                         }
                     }
                     
+                    // update the data units
+                    data.units = unitTypes[key];
+                    
                     // remove the match component from the input string
                     testString = testString.slice(0, match.index) + testString.slice(match.index + match[0].length);
                     
@@ -355,6 +369,9 @@ var ratchet = (function() {
                 // initialise the properties (if we have data)
                 if (data) {
                     props[key] = new XYZ(key, data);
+                    
+                    // reset the data
+                    data = undefined;
                 }
             });
         }

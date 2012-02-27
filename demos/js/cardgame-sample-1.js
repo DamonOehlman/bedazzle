@@ -3,7 +3,9 @@ function fanCards() {
         rotateAmount = 40 / cards.length;
     
     _.each(cards, function(card, index) {
-        bedazzle(card).x(3 * index, true).rotate(rotateAmount * index, true);
+        var transform = ratchet('translateX(' + (3 * index) + 'px) rotate(' + (rotateAmount * index) + ')');
+        
+        stylar(card, 'transform', transform.toString());
     });
 }
 
@@ -19,7 +21,10 @@ $(function() {
     
     $('.card').on('click', function() {
         bedazzle(this)
-            .set('rotate20 y-350 x75').end(function(elements) {
+            .manual(function(elements) {
+                stylar(elements, 'transform', ratchet('translate(75px, -350px) rotate(20deg)'));
+            })
+            .end(function(elements) {
                 $('#cardtable').append(elements);
                 stylar(elements, 'transform', '');
                 fanCards();

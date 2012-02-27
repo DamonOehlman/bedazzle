@@ -16,6 +16,7 @@ Bedazzler.prototype = {
     _applyChanges: function() {
         var ii, element, key, styleKey,
             props = this.queued.shift(),
+            bedazzler = this,
             transitionDuration, transitioners = [],
             timeout = 0;
             
@@ -23,6 +24,11 @@ Bedazzler.prototype = {
         if (! props) {
             return;
         }
+        
+        // if we have manual helpers, then run then now
+        props.manualHelpers.forEach(function(helper) {
+            helper.call(bedazzler, bedazzler.elements);
+        });
         
         // iterate through the elements and update
         for (ii = this.elements.length; ii--; ) {
@@ -52,6 +58,7 @@ Bedazzler.prototype = {
             element.set(props.elements[ii]);
         }
         
+        this.rtid = 0;
         this.done.push(props);
         this._next(transitioners, timeout, props.callbacks || []);
     },
@@ -63,10 +70,11 @@ Bedazzler.prototype = {
             this._applyChanges();
         }
         else {
-            clearTimeout(this.rtid);
-            this.rtid = setTimeout(function() {
-                bedazzler._applyChanges();
-            }, this._opts.frameDelay || 0);
+            if (! this.rtid) {
+                this.rtid = setTimeout(function() {
+                    bedazzler._applyChanges();
+                }, this._opts.frameDelay || 0);
+            }
         }
         
         return this;
@@ -74,9 +82,14 @@ Bedazzler.prototype = {
     
     _next: function(transitioners, timeout, callbacks) {
         var transitionsRemaining = transitioners.length,
-            bedazzler = this;
+            bedazzler = this,
+            listener;
             
         function runNext() {
+            if (listener) {
+                listener.stop();
+            }
+            
             // trigger the callbacks
             _.each(callbacks, function(callback) {
                 if (typeof callback == 'function') {
@@ -85,34 +98,22 @@ Bedazzler.prototype = {
             });
             
             // trigger the next update cycle
-            bedazzler._changed();
+            bedazzler._applyChanges();
         }
             
-        if (transitioners.length) {
+        // if we have a transition, then on transition end, apply the changes
+        if (transitionsRemaining > 0 && typeof aftershock == 'function') {
+            listener = aftershock(transitioners, { timeout: timeout + 20 }, function() {
+                runNext();
+            });
+        }
+        else if (transitionsRemaining > 0) {
             setTimeout(runNext, timeout || 0);
         }
         else if (this.queued.length > 0) {
             runNext();
         }
             
-        /*
-            
-        // if we have a transition, then on transition end, apply the changes
-        if (transitionsRemaining && typeof aftershock == 'function') {
-            transitioners.forEach(function(transitioner) {
-                var listener = aftershock(transitioner, { timeout: timeout }, function() {
-                    transitionsRemaining--;
-                    
-                    if (transitionsRemaining <= 0) {
-                        runNext();
-                    }
-                });
-            });
-        }
-        else if (this.queued.length > 0) {
-            this._applyChanges();
-        }
-        */
     },
     
     end: function(callback) {
@@ -125,11 +126,15 @@ Bedazzler.prototype = {
         var bedazzler = this;
         
         this.end(function() {
-            bedazzler.queued = [].concat(bedazzler.done);
+            bedazzler.queued = bedazzler.done;
             bedazzler.done = [];
-
-            bedazzler._changed();
         });
+    },
+    
+    manual: function(helper) {
+        this.props.manualHelpers.push(helper);
+        
+        return this._changed();
     },
     
     opts: function(opts) {
@@ -157,7 +162,7 @@ Bedazzler.prototype = {
             }
         }
         
-        return this;
+        return this._changed();
     },
     
     update: function(props, absolute) {
@@ -182,13 +187,13 @@ Object.defineProperty(Bedazzler.prototype, 'frame', {
     get: function () {
         var props = {
             elements: [],
-            elementTransforms: [],
+            manualHelpers: [],
             callbacks: []
         }, key, ii, currentTransform;
         
         if (transforms) {
-            currentTransform = stylar(this.elements[0]).get('transform', true);
-            props.transform = ratchet(currentTransform);
+            // currentTransform = stylar(this.elements[0]).get('transform', true);
+            props.transform = new ratchet.Transform(); // ratchet(currentTransform);
         }
         
         // if we have current properties, then clone the values
@@ -216,7 +221,7 @@ Object.defineProperty(Bedazzler.prototype, 'frame', {
 
 Object.defineProperty(Bedazzler.prototype, 'props', {
     get: function() {
-        if (! this._props) {
+        if (this.queued.length === 0) {
             this.frame;
         }
         
