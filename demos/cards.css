@@ -1,0 +1,40 @@
+#cardtable {
+  background: #008000;
+  width: 600px;
+  height: 300px;
+  padding: 20px;
+}
+#player1 {
+  background: #808080;
+  width: 600px;
+  height: 200px;
+  padding: 20px;
+}
+.hand {
+  margin-top: 35px;
+  -webkit-transform: rotate(-20deg);
+  -moz-transform: rotate(-20deg);
+  transform: rotate(-20deg);
+  position: absolute;
+}
+.card {
+  background: #fff;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+  position: absolute;
+  width: 100px;
+  height: 145px;
+  padding: 2px;
+  -webkit-box-shadow: #333 0 0 2px;
+  -moz-box-shadow: #333 0 0 2px;
+  box-shadow: #333 0 0 2px;
+  -webkit-transition: all ease-in-out 0.3s;
+  -moz-transition: all ease-in-out 0.3s;
+  transition: all ease-in-out 0.3s;
+  -webkit-transform-origin: left bottom;
+}
+.card img {
+  height: 100%;
+  width: 100%;
+}

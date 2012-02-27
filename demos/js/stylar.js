@@ -58,7 +58,7 @@ var stylar = (function() {
                 style = elements[0].style;
             }
                 
-            return style[readKey];
+            return style ? style[readKey] : '';
         }
         
         function setter(attr, val) {

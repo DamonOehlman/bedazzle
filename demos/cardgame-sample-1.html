@@ -6,42 +6,23 @@
 <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=no;"/>
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="red" />
-<link rel="stylesheet" type="text/css" href="demos.css" />
+<link rel="stylesheet" type="text/css" href="cards.css" />
 <script src="js/modernizr.js"></script>
 </head>
 <body>
-    <div class="box fader"></div>
-	<div class="box spinner mover fader stretcher"></div>
-	<div class="box fader spinner"></div>
-	<div class="box fader mover stretcher"></div>
-	<div class="box mover"></div>
-
+    <div id="cardtable">
+        <div id="cardtarget"></div>
+    </div>
+    <div id="player1">
+        <div class="hand"></div>
+    </div>
     <script src="js/jquery.min.js"></script>
     <script src="js/underscore.js"></script>
     <script src="js/stylar.js"></script>
     <script src="js/ratchet.js"></script>
     <script src="js/aftershock.js"></script>
     <script src="../bedazzle.js"></script>
-	<script>
-	bedazzle('.spinner')
-	    .rotate(180)
-	    .frame
-	    .frame.rotate(-180);
-	    
-	bedazzle('.fader')
-	    .opacity(0.5)
-	    .frame.set('opacity', 1.0);
-	    
-	bedazzle('.mover')
-	    .x(100)
-	    .frame
-	    .frame.x(-100);
-	    
-	bedazzle('.stretcher')
-	    .frame
-	    .frame.height(100)
-	    .frame
-	    .frame.height(-100)
-	</script>
+    <script src="js/cards.js"></script>
+    <script src="js/cardgame-sample-1.js"></script>
 </body>
 </html>

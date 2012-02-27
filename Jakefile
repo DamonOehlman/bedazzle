@@ -17,6 +17,12 @@ task('build-demos', function() {
     });
 });
 
+task('build-demo-deps', function() {
+    interleave('demos/src/js/deps', { 
+        path: 'demos/js'
+    });
+});
+
 task('default', function() {
     interleave('src', {
         path: '.'
