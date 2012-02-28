@@ -100,14 +100,16 @@ Bedazzler.prototype = {
             // trigger the next update cycle
             bedazzler._applyChanges();
         }
-            
+        
+        /*
         // if we have a transition, then on transition end, apply the changes
         if (transitionsRemaining > 0 && typeof aftershock == 'function') {
             listener = aftershock(transitioners, { timeout: timeout + 20 }, function() {
                 runNext();
             });
         }
-        else if (transitionsRemaining > 0) {
+        else */
+        if (transitionsRemaining > 0) {
             setTimeout(runNext, timeout || 0);
         }
         else if (this.queued.length > 0) {
@@ -213,6 +215,12 @@ Object.defineProperty(Bedazzler.prototype, 'frame', {
         // initialise the current properties that we are modifying
         this.queued.push(this._props = props);
 
+        return this;
+    },
+    
+    set: function(value) {
+        console.log(value);
+        
         return this;
     },
     
