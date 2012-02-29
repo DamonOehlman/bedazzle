@@ -1,6 +1,5 @@
-var modAvail = typeof Modernizr != 'undefined',
-    transforms = modAvail && Modernizr.csstransforms && typeof ratchet != 'undefined',
-    transforms3d = transforms && Modernizr.csstransforms3d,
+var transforms = typeof ratchet != 'undefined',
+    transforms3d = typeof Modernizr != 'undefined' && Modernizr.csstransforms3d,
     reStripValue = /^\-?\d+/,
     
     // define the property map
