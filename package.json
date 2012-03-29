@@ -10,7 +10,7 @@
     },
     
     "devDependencies": {
-        "interleave": "0.1.x",
+        "interleave": "0.3.x",
         "stylus": "*",
         "nib": "*"
     },

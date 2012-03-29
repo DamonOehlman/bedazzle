@@ -25,6 +25,7 @@ task('build-demo-deps', function() {
 
 task('default', function() {
     interleave('src', {
-        path: '.'
+        path: '.',
+        'package': true
     });    
 });
