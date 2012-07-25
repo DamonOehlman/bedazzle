@@ -1,31 +1,28 @@
 var interleave = require('interleave');
 
 task('build-demos', function() {
-    interleave('demos/src/js', {
-        path: 'demos/js'
+    interleave('demos/src/js/*.js', {
+        output: 'demos/js'
     });
     
-    interleave('demos/src/css', {
-        path: 'demos',
+    interleave('demos/src/css/*.*', {
+        output: 'demos',
         stylus: {
-            plugins: {
-                nib: require('nib')
-            },
-            
+            plugins: [ require('nib') ],
             urlEmbed: true
         }
     });
 });
 
 task('build-demo-deps', function() {
-    interleave('demos/src/js/deps', { 
-        path: 'demos/js'
+    interleave('demos/src/js/deps/*.js', { 
+        output: 'demos/js'
     });
 });
 
 task('default', function() {
-    interleave('src', {
-        path: '.',
-        'package': true
-    });    
+    interleave('src/*.js', {
+        output: 'dist',
+        wrap: ['glob', 'amd']
+    });
 });

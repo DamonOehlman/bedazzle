@@ -1,3 +1,5 @@
+
+// req: 
 function fanCards() {
     var cards = $('#player1 .card'),
         rotateAmount = 40 / cards.length;

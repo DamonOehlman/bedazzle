@@ -10,6 +10,8 @@
   background: #f00;
   -webkit-transition: all ease-in-out 0.5s;
   -moz-transition: all ease-in-out 0.5s;
+  -o-transition: all ease-in-out 0.5s;
+  -ms-transition: all ease-in-out 0.5s;
   transition: all ease-in-out 0.5s;
 }
 .car {
@@ -20,6 +22,8 @@
 .spinner {
   -webkit-transition: all linear 0.5s;
   -moz-transition: all linear 0.5s;
+  -o-transition: all linear 0.5s;
+  -ms-transition: all linear 0.5s;
   transition: all linear 0.5s;
 }
 .float {

@@ -1,6 +1,6 @@
 // dep: ratchet, stylar
 
-//= block://sidelab/parseProps
+//= github://sidelab/blockstore/parseProps
 
 //= core/detection
 //= core/bedazzler

@@ -1,3 +1,5 @@
+
+// req: 
 // Aftershock function provides a cross-browser wrapper to transitionEnd events.
 //
 //      aftershock(elements, opts*, callback)

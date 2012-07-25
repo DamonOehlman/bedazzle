@@ -1,3 +1,5 @@
+
+// req: 
 //     keymaster.js
 //     (c) 2011 Thomas Fuchs
 //     keymaster.js may be freely distributed under the MIT license.
@@ -41,8 +43,7 @@
 
   // handle keydown event
   function dispatch(event){
-    var key, tagName, handler, k, i, modifiersMatch;
-    tagName = (event.target || event.srcElement).tagName;
+    var key, handler, k, i, modifiersMatch;
     key = event.keyCode;
 
     // if a modifier key, set the key.<modifierkeyname> property to true and return
@@ -54,8 +55,9 @@
       return;
     }
 
-    // ignore keypressed in any elements that support keyboard data input
-    if (tagName == 'INPUT' || tagName == 'SELECT' || tagName == 'TEXTAREA') return;
+    // see if we need to ignore the keypress (ftiler() can can be overridden)
+    // by default ignore key presses if a select, textarea, or input is focused
+    if(!assignKey.filter.call(this, event)) return;
 
     // abort if no potentially matching shortcuts found
     if (!(key in _handlers)) return;
@@ -131,12 +133,31 @@
     }
   };
 
+  function filter(event){
+    var tagName = (event.target || event.srcElement).tagName;
+    // ignore keypressed in any elements that support keyboard data input
+    return !(tagName == 'INPUT' || tagName == 'SELECT' || tagName == 'TEXTAREA');
+  }
+
   // initialize key.<modifier> to false
   for(k in _MODIFIERS) assignKey[k] = false;
 
   // set current scope (default 'all')
   function setScope(scope){ _scope = scope || 'all' };
   function getScope(){ return _scope || 'all' };
+
+  // delete all handlers for a given scope
+  function deleteScope(scope){
+    var key, handlers, i;
+
+    for (key in _handlers) {
+      handlers = _handlers[key];
+      for (i = 0; i < handlers.length; ) {
+        if (handlers[i].scope === scope) handlers.splice(i, 1);
+        else i++;
+      }
+    }
+  };
 
   // cross-browser events
   function addEvent(object, event, method) {
@@ -153,12 +174,13 @@
   // reset modifiers to false whenever the window is (re)focused.
   addEvent(window, 'focus', resetModifiers);
 
-  // set window.key and window.key.setScope
+  // set window.key and window.key.set/get/deleteScope, and the default filter
   global.key = assignKey;
   global.key.setScope = setScope;
   global.key.getScope = getScope;
+  global.key.deleteScope = deleteScope;
+  global.key.filter = filter;
 
   if(typeof module !== 'undefined') module.exports = key;
 
 })(this);
-
