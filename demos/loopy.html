@@ -14,10 +14,11 @@
 
     <script src="js/jquery.min.js"></script>
     <script src="js/underscore.js"></script>
-    <script src="js/stylar.js"></script>
-    <script src="js/ratchet.js"></script>
-    <script src="../bedazzle.js"></script>
+    <script src="../build/build.js"></script>
 	<script>
+    var bedazzle = require('bedazzle'),
+        stylar = require('DamonOehlman-stylar/stylar.js');
+
 	bedazzle('.spinner').x(50).rotate(180).end(function(elements) {
 	    stylar(elements[0]).set('background', 'blue');
 	}).loop();

@@ -1,3 +1,6 @@
+var bedazzle = require('bedazzle'),
+    stylar = require('DamonOehlman-stylar/stylar.js'),
+    ratchet = require('DamonOehlman-ratchet/ratchet.js');
 
 // req: 
 function fanCards() {

@@ -19,12 +19,11 @@
 
     <script src="js/jquery.min.js"></script>
     <script src="js/underscore.js"></script>
-    <script src="js/stylar.js"></script>
-    <script src="js/ratchet.js"></script>
-    <script src="../bedazzle.js"></script>
+    <script src="../build/build.js"></script>
     
     <script>
-    var container = document.getElementById('container');
+    var bedazzle = require('bedazzle'),
+        container = document.getElementById('container');
 
     for (var ii = 0; ii < 200; ii++) {
     	var box = document.createElement('div');
