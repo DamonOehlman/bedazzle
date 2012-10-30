@@ -1,29 +1,25 @@
 {
-    "name": "bedazzle",
-    "description": "CSS3 Animation Helpers for JS",
-    "tags": ["css3", "animation"],
-    "author": "Damon Oehlman <damon.oehlman@sidelab.com>",
-    "version": "0.0.1",
-    "main": "bedazzle",
-    
-    "dependencies": {
-    },
-    
-    "devDependencies": {
-        "interleave": "0.5.x",
-        "stylus": "0.28.x",
-        "nib": "0.7.x"
-    },
-    
-    "repository": {
-        "type": "git",
-        "url": "http://github.com/DamonOehlman/bedazzle.git"
-    },
-    
-    "bugs": {
-        "url": "http://github.com/DamonOehlman/bedazzle/issues"
-    },
-
-    "contributors": [
-    ]
+  "name": "bedazzle",
+  "description": "CSS3 Animation Helpers for JS",
+  "tags": [
+    "css3",
+    "animation"
+  ],
+  "author": "Damon Oehlman <damon.oehlman@sidelab.com>",
+  "version": "0.1.0",
+  "main": "bedazzle",
+  "dependencies": {},
+  "devDependencies": {
+    "interleave": "0.5.x",
+    "stylus": "0.28.x",
+    "nib": "0.7.x"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/DamonOehlman/bedazzle.git"
+  },
+  "bugs": {
+    "url": "http://github.com/DamonOehlman/bedazzle/issues"
+  },
+  "contributors": []
 }

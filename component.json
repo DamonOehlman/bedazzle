@@ -2,8 +2,11 @@
   "name": "bedazzle",
   "repo": "DamonOehlman/bedazzle",
   "description": "CSS3 Animation Helpers for JS",
-  "version": "0.0.1",
-  "tags": ["css3", "animation"],
+  "version": "0.1.0",
+  "tags": [
+    "css3",
+    "animation"
+  ],
   "main": "bedazzle.js",
   "dependencies": {
     "DamonOehlman/ratchet": "*",
