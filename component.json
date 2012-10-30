@@ -1,0 +1,15 @@
+{
+  "name": "bedazzle",
+  "repo": "DamonOehlman/bedazzle",
+  "description": "CSS3 Animation Helpers for JS",
+  "version": "0.0.1",
+  "tags": ["css3", "animation"],
+  "main": "bedazzle.js",
+  "dependencies": {
+    "DamonOehlman/ratchet": "*",
+    "DamonOehlman/stylar": "*"
+  },
+  "scripts": [
+    "bedazzle.js"
+  ]
+}
