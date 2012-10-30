@@ -19,10 +19,3 @@ task('build-demo-deps', function() {
         output: 'demos/js'
     });
 });
-
-task('default', function() {
-    interleave('src/*.js', {
-        output: 'dist',
-        wrap: ['glob', 'amd']
-    });
-});

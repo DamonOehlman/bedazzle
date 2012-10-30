@@ -1,4 +1,28 @@
-var stylar = (function() {
+
+// req: 
+/* ~stylar~
+ * 
+ * Simple Object Query Language
+ * 
+ * -meta---
+ * version:    0.1.5
+ * builddate:  2012-10-30T04:14:02.461Z
+ * generator:  interleave@0.5.23
+ * 
+ * 
+ * 
+ */ 
+
+// umdjs returnExports pattern: https://github.com/umdjs/umd/blob/master/returnExports.js
+(function (root, factory) {
+    if (typeof exports === 'object') {
+        module.exports = factory();
+    } else if (typeof define === 'function' && define.amd) {
+        define([], factory);
+    } else {
+        root['stylar'] = factory();
+    }
+}(this, function () {
     var prefixes = ['ms', 'o', 'Moz', 'webkit', ''],
         knownKeys = {},
         getComputed = null,
@@ -35,19 +59,24 @@ var stylar = (function() {
         return attribute;
     }
     
-    function _stylar(elements, attribute, value) {
+    function stylar(elements, attribute, value) {
         var helpers = { get: getter, set: setter };
         
-        if (! Array.isArray(elements)) {
-            elements = [elements];
+        if (typeof elements == 'string' || elements instanceof String) {
+            elements = document.querySelectorAll(elements);
         }
+        // if we don't have a splice function, then we don't have an array
+        // make it one
+        else if (typeof elements.length == 'undefined') {
+            elements = [elements];
+        } // if..else
         
         function getter(attr, ignoreComputed) {
             var readKey, style;
             
             // get the read key
             readKey = knownKeys[attr] || sniffProperty(elements[0], attr);
-
+    
             // if we have the get computed function defined, and the opts.ignoreComputed is not set
             // then get the computed style fot eh element
             if (getComputed && (! ignoreComputed)) {
@@ -71,7 +100,7 @@ var stylar = (function() {
             }
             else {
                 var styleKey = knownKeys[attr] || sniffProperty(elements[0], attr);
-
+    
                 for (var ii = elements.length; ii--; ) {
                     elements[ii].style[styleKey] = val;
                 }
@@ -94,7 +123,7 @@ var stylar = (function() {
         }
     }
     
-    _stylar.sniffProperty = sniffProperty;
+    stylar.sniffProperty = sniffProperty;
     
-    return _stylar;
-})();
+    return typeof stylar != 'undefined' ? stylar : undefined;
+}));

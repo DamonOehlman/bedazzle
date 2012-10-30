@@ -1,5 +1,26 @@
+/* ~bedazzle~
+ * 
+ * CSS3 Animation Helpers for JS
+ * 
+ * -meta---
+ * version:    0.0.1
+ * builddate:  2012-10-30T05:12:53.937Z
+ * generator:  interleave@0.5.23
+ * 
+ * 
+ * 
+ */ 
 
-define('bedazzle', ['ratchet', 'stylar'], function(ratchet, stylar) {
+// umdjs returnExports pattern: https://github.com/umdjs/umd/blob/master/returnExports.js
+(function (root, factory) {
+    if (typeof exports === 'object') {
+        module.exports = factory(require('ratchet'), require('stylar'));
+    } else if (typeof define === 'function' && define.amd) {
+        define(['ratchet', 'stylar'], factory);
+    } else {
+        root['bedazzle'] = factory(root['ratchet'], root['stylar']);
+    }
+}(this, function (ratchet, stylar) {
     
     var parseProps = (function() {
         var rePropValue = /^([a-z]+|[a-z\-]+(?=\:))([\d\%\.\-\!]+|\:[\"\'].*?[\"\']|\:[^\s]+)(\s|\,|$)/i,
@@ -401,4 +422,4 @@ define('bedazzle', ['ratchet', 'stylar'], function(ratchet, stylar) {
     }
     
     return typeof bedazzle != 'undefined' ? bedazzle : undefined;
-});
+}));

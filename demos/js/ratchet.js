@@ -1,5 +1,28 @@
-var ratchet = (function() {
-    
+
+// req: 
+/* ~ratchet~
+ * 
+ * CSS3 Transform Parsers and Generator
+ * 
+ * -meta---
+ * version:    0.1.1
+ * builddate:  2012-10-30T04:20:17.029Z
+ * generator:  interleave@0.5.23
+ * 
+ * 
+ * 
+ */ 
+
+// umdjs returnExports pattern: https://github.com/umdjs/umd/blob/master/returnExports.js
+(function (root, factory) {
+    if (typeof exports === 'object') {
+        module.exports = factory();
+    } else if (typeof define === 'function' && define.amd) {
+        define([], factory);
+    } else {
+        root['ratchet'] = factory();
+    }
+}(this, function () {
     function TransformValue(value, units) {
         var parsedVal = parseFloat(value);
         
@@ -23,7 +46,6 @@ var ratchet = (function() {
         
         return match;
     };
-
     function XYZ(type, opts) {
         var defaultUnits;
         
@@ -136,7 +158,6 @@ var ratchet = (function() {
         
         return output.join(' ');
     };
-
     var scaleOps = {
         add: 'mul',
         sub: 'div'
@@ -212,8 +233,7 @@ var ratchet = (function() {
             return newTransform;
         };
     });
-
-
+    
     function _extractVal(index, expectUnits) {
         return function(match) {
             var units = '', value;
@@ -321,7 +341,6 @@ var ratchet = (function() {
                 }
             ]
         };
-
     
     function fromString(inputString) {
         var props = new RatchetTransform(), key, match, data, section, value, testString;
@@ -379,15 +398,16 @@ var ratchet = (function() {
         return props;
     } // fromString
     
-    function _ratchet(input) {
+    function ratchet(input) {
         if (typeof input == 'string' || (input instanceof String)) {
             return fromString(input);
         }
     }
     
     // bind the internal helpers so we can test 
-    _ratchet.fromString = fromString;
-    _ratchet.Transform = RatchetTransform;
+    ratchet.fromString = fromString;
+    ratchet.Transform = RatchetTransform;
+    ratchet.XYZ = XYZ;
     
-    return _ratchet;
-})();
+    return typeof ratchet != 'undefined' ? ratchet : undefined;
+}));
