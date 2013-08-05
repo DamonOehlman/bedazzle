@@ -1,11 +1,13 @@
-// dep: ratchet, stylar
+/* jshint node: true */
+'use strict';
 
-//= github://sidelab/blockstore/parseProps
+/**
+  # Bedazzle
 
-//= core/detection
-//= core/bedazzler
+**/
 
-var bedazzle = function(elements, scope) {
+var Bedazzler = require('./bedazzler');
+var bedazzle = module.exports = function(elements, scope) {
 
     // check the elements
     if (typeof elements == 'string' || elements instanceof String) {

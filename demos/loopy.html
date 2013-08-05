@@ -7,21 +7,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="red" />
 <link rel="stylesheet" type="text/css" href="demos.css" />
-<script src="js/modernizr.js"></script>
 </head>
 <body>
-	<div class="box spinner"></div>
-
-    <script src="js/jquery.min.js"></script>
-    <script src="js/underscore.js"></script>
-    <script src="../build/build.js"></script>
-	<script>
-    var bedazzle = require('bedazzle'),
-        stylar = require('DamonOehlman-stylar/stylar.js');
-
-	bedazzle('.spinner').x(50).rotate(180).end(function(elements) {
-	    stylar(elements[0]).set('background', 'blue');
-	}).loop();
-	</script>
+<div class="box spinner"></div>
+<script src="loopy-bundle.js"></script>
 </body>
 </html>

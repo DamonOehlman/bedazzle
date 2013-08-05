@@ -8,11 +8,16 @@
   "author": "Damon Oehlman <damon.oehlman@sidelab.com>",
   "version": "0.1.0",
   "main": "bedazzle",
-  "dependencies": {},
+  "dependencies": {
+    "stylar": "~0.2.1",
+    "ratchet": "~0.3.0",
+    "underscore": "~1.5.1"
+  },
   "devDependencies": {
     "interleave": "0.5.x",
     "stylus": "0.28.x",
-    "nib": "0.7.x"
+    "nib": "0.7.x",
+    "keymaster": "~1.0.2"
   },
   "repository": {
     "type": "git",

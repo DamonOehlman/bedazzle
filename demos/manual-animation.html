@@ -7,23 +7,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="red" />
 <link rel="stylesheet" type="text/css" href="demos.css" />
-<script src="js/modernizr.js"></script>
 </head>
 <body>
-    <div class="car"></div>
-
-    <script src="js/jquery.min.js"></script>
-    <script src="js/underscore.js"></script>
-    <script src="js/keymaster.js"></script>
-    <script src="../build/build.js"></script>
-	<script>
-	var bedazzle = require('bedazzle'),
-        car = bedazzle('.car').opts({ immediate: true });
-	
-	key('up', function(){ car.x(5) });
-	key('down', function(){ car.x(-5) });
-	key('left', function() { car.rotate(-5); });
-	key('right', function() { car.rotate(5); });
-	</script>
+<div class="car"></div>
+<script src="manual-animation-bundle.js"></script>
 </body>
 </html>
