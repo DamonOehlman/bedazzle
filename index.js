@@ -38,12 +38,17 @@ var reStripValue = /^\-?\d+/;
   ## Bedazzler prototype
 
 **/
-function Bedazzler(elements) {
+function Bedazzler(elements, opts) {
   if (! (this instanceof Bedazzler)) {
-    return new Bedazzler(elements);
+    return new Bedazzler(elements, opts);
   }
 
-  this.elements = elements;
+  // if we have been given a string, then find the elements
+  if (typeof elements == 'string' || (elements instanceof String)) {
+    elements = ((opts || {}).scope || document).querySelectorAll(elements);
+  }
+
+  this.elements = [].slice.call(elements);
   this.rtid = 0;
   this.state = {};
   this.done = [];
@@ -130,10 +135,6 @@ p.set = function(name, value) {
   ### update(props, absolute?)
 **/
 p.update = function(props, absolute) {
-  if (typeof props == 'string' || props instanceof String) {
-    props = parseProps(props);
-  }
-
   // update the state of each of the properties
   if (props) {
     for (var key in props) {
@@ -150,40 +151,12 @@ p.update = function(props, absolute) {
   ### @frame
 
 **/
-Object.defineProperty(Bedazzler.prototype, 'frame', {
-  get: function () {
-    var ii;
-    var props = {
-      elements: [],
-      manualHelpers: [],
-      callbacks: []
-    };
-    
-    // currentTransform = stylar(this.elements[0]).get('transform', true);
-    props.transform = new ratchet.Transform(); // ratchet(currentTransform);
-    
-    // if we have current properties, then clone the values
-    if (this._props) {
-      // copy each of the elements
-      for (ii = this.elements.length; ii--; ) {
-        props.elements[ii] = _.clone(this._props.elements[ii]) || {};
-      }
-    }
-    // otherwise create the new properties
-    else {
-      for (ii = this.elements.length; ii--; ) {
-        props.elements[ii] = {};
-      }
-    }
-    
-    // initialise the current properties that we are modifying
-    this.queued.push(this._props = props);
-
-    return this;
+Object.defineProperty(p, 'frame', {
+  get: function() {
+    return this._createFrame();
   },
   
   set: function(value) {
-    console.log(value);
     return this;
   },
   
@@ -193,11 +166,10 @@ Object.defineProperty(Bedazzler.prototype, 'frame', {
 /**
   ### @props
 **/
-Object.defineProperty(Bedazzler.prototype, 'props', {
+Object.defineProperty(p, 'props', {
   get: function() {
     if (this.queued.length === 0) {
-      // WTF?
-      // this.frame;
+      this._createFrame();
     }
     
     return this._props;
@@ -347,6 +319,41 @@ p._applyChanges = function() {
   this.rtid = 0;
   this.done.push(props);
   this._next(transitioners, timeout, props.callbacks || []);
+};
+
+/**
+  ### _createFrame
+
+  Create a new animation frame
+**/
+p._createFrame = function() {
+  var ii;
+  var props = {
+    elements: [],
+    manualHelpers: [],
+    callbacks: []
+  };
+  
+  // currentTransform = stylar(this.elements[0]).get('transform', true);
+  props.transform = new ratchet.Transform(); // ratchet(currentTransform);
+  
+  // if we have current properties, then clone the values
+  if (this._props) {
+    // copy each of the elements
+    for (ii = this.elements.length; ii--; ) {
+      props.elements[ii] = _.clone(this._props.elements[ii]) || {};
+    }
+  }
+  // otherwise create the new properties
+  else {
+    for (ii = this.elements.length; ii--; ) {
+      props.elements[ii] = {};
+    }
+  }
+  
+  // initialise the current properties that we are modifying
+  this.queued.push(this._props = props);
+  return this;
 };
 
 /**
