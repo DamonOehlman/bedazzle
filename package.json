@@ -14,10 +14,8 @@
     "underscore": "~1.5.1"
   },
   "devDependencies": {
-    "interleave": "0.5.x",
-    "stylus": "0.28.x",
-    "nib": "0.7.x",
-    "keymaster": "~1.0.2"
+    "browserify": "~2.34.3",
+    "es6ify": "~0.4.3"
   },
   "repository": {
     "type": "git",
