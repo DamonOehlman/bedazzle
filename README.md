@@ -98,7 +98,12 @@ function nextColor(elements) {
   stylar(elements[0]).set('background', 'blue');
 }
 
-bedazzle('.spinner').set('x', 50).rotate(180).end(nextColor).loop();
+bedazzle('.spinner')
+  .frame(function(elements) {
+    this.x(50).rotate(180);
+    nextColor(elements);
+  })
+  .loop();
 ```
 
 ### Bedazzler#manual(helper)
@@ -117,11 +122,7 @@ TBC
 
 TBC
 
-### @props
-
 ### _applyChanges()
-
-### _changed()
 
 ### _next(transitioners, timeout, callbacks)
 
