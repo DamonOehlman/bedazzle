@@ -35,42 +35,91 @@ we have some stripped down html:
 
 Then some css which is used across most of the examples:
 
-```
-ERROR: could not find: 
+```css
+.box {
+  width: 40px;
+  height: 40px;
+  padding: 5px;
+  margin: 0 5px 5px 0;
+  background: #f00;
+  transition: all ease-in-out 0.5s;
+}
+
+.spinner {
+  transition: all linear 0.5s;
+}
 ```
 
 Finally, a little bit of browserifiable css to make it all work:
 
 ```js
-require('bedazzle')('.box')
-  .frame.x(200).y(200).rotate(-45)
-  .frame.x(-200).opacity(0.2)
-  .frame.x(200).y(50).rotate(315).height(-100).set('opacity', 1);
+var bedazzle = require('bedazzle');
+
+bedazzle('.box')
+  .frame(function() {
+    this.x(200).y(200).rotate(-45);
+  })
+  .frame(function() {
+    this.x(-200).opacity(0.2)
+  })
+  .frame(function() {
+    this.x(200).y(50).rotate(315).height(-100).set('opacity', 1)
+  });
 ```
 
-## Bedazzler prototype
+## Reference
 
-### end(callback)
+### bedazzle(elements, opts?)
 
-### loop()
+Create a new `Bedazzler` instance which is used to orchestrate the
+animation of the supplied `elements` (or those elements matched by the
+selector referred to by elements if it is a string).
 
-### manual(helper)
+### Bedazzler#frame(action?)
 
-### opts(opts)
+Define a new frame in the animation loop.  If an action function is
+supplied, then it will be called (with `this` bound to the Bedazzler) once
+the frame becomes active.
 
-### set(name, value)
+### Bedazzler#end(callback)
 
-### update(props, absolute?)
+Once the current frame has completed, trigger the supplied function.
 
-### @frame
+### Bedazzler#loop()
+
+When all of the defined frames have completed, restart from the beginning.
+An example of using loop can be found in the 'loopy' example, shown below:
+
+```js
+var bedazzle = require('bedazzle');
+var stylar = require('stylar');
+
+function nextColor(elements) {
+  stylar(elements[0]).set('background', 'blue');
+}
+
+bedazzle('.spinner').set('x', 50).rotate(180).end(nextColor).loop();
+```
+
+### Bedazzler#manual(helper)
+
+TBC
+
+### Bedazzler#opts(opts)
+
+TBC
+
+### Bedazzler#set(name, value)
+
+TBC
+
+### Bedazzler#update(props, absolute?)
+
+TBC
 
 ### @props
 
 ### _applyChanges()
-
-### _createFrame
-
-Create a new animation frame
 
 ### _changed()
 
