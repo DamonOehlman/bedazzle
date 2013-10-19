@@ -23,11 +23,13 @@
 
   Then some css which is used across most of the examples:
 
-  <<< examples/demo.css
+  <<< examples/demos.css
 
   Finally, a little bit of browserifiable css to make it all work:
 
   <<< examples/simple.js
+
+  ## Reference
 
 **/
 
@@ -60,7 +62,11 @@ var standardProps = [
 var reStripValue = /^\-?\d+/;
 
 /**
-  ## Bedazzler prototype
+  ### bedazzle(elements, opts?)
+
+  Create a new `Bedazzler` instance which is used to orchestrate the
+  animation of the supplied `elements` (or those elements matched by the
+  selector referred to by elements if it is a string).
 
 **/
 function Bedazzler(elements, opts) {
@@ -90,7 +96,47 @@ module.exports = Bedazzler;
 var p = Bedazzler.prototype;
 
 /**
-  ### end(callback)
+  ### Bedazzler#frame(action?)
+
+  Define a new frame in the animation loop.  If an action function is
+  supplied, then it will be called (with `this` bound to the Bedazzler) once
+  the frame becomes active.
+
+**/
+p.frame = function(action) {
+  var ii;
+  var props = {
+    elements: [],
+    manualHelpers: [],
+    callbacks: []
+  };
+  
+  // currentTransform = stylar(this.elements[0]).get('transform', true);
+  props.transform = new ratchet.Transform(); // ratchet(currentTransform);
+  
+  // if we have current properties, then clone the values
+  if (this._props) {
+    // copy each of the elements
+    for (ii = this.elements.length; ii--; ) {
+      props.elements[ii] = _.clone(this._props.elements[ii]) || {};
+    }
+  }
+  // otherwise create the new properties
+  else {
+    for (ii = this.elements.length; ii--; ) {
+      props.elements[ii] = {};
+    }
+  }
+  
+  // initialise the current properties that we are modifying
+  this.queued.push(this._props = props);
+  return this;
+};
+
+/**
+  ### Bedazzler#end(callback)
+
+  Once the current frame has completed, trigger the supplied function.
 
 **/
 p.end = function(callback) {
@@ -99,7 +145,13 @@ p.end = function(callback) {
 };
 
 /**
-  ### loop()
+  ### Bedazzler#loop()
+
+  When all of the defined frames have completed, restart from the beginning.
+  An example of using loop can be found in the 'loopy' example, shown below:
+
+  <<< examples/loopy.js
+
 **/
 p.loop = function() {
   var bedazzler = this;
@@ -111,7 +163,9 @@ p.loop = function() {
 };
 
 /**
-  ### manual(helper)
+  ### Bedazzler#manual(helper)
+
+  TBC
 
 **/
 p.manual = function(helper) {
@@ -121,7 +175,9 @@ p.manual = function(helper) {
 };
 
 /**
-  ### opts(opts)
+  ### Bedazzler#opts(opts)
+
+  TBC
 
 **/
 p.opts = function(opts) {
@@ -131,7 +187,9 @@ p.opts = function(opts) {
 };
 
 /**
-  ### set(name, value)
+  ### Bedazzler#set(name, value)
+
+  TBC
 
 **/
 p.set = function(name, value) {
@@ -157,7 +215,10 @@ p.set = function(name, value) {
 };
 
 /**
-  ### update(props, absolute?)
+  ### Bedazzler#update(props, absolute?)
+
+  TBC
+
 **/
 p.update = function(props, absolute) {
   // update the state of each of the properties
@@ -173,28 +234,12 @@ p.update = function(props, absolute) {
 };
 
 /**
-  ### @frame
-
-**/
-Object.defineProperty(p, 'frame', {
-  get: function() {
-    return this._createFrame();
-  },
-  
-  set: function(value) {
-    return this;
-  },
-  
-  configurable: true
-});
-
-/**
   ### @props
 **/
 Object.defineProperty(p, 'props', {
   get: function() {
     if (this.queued.length === 0) {
-      this._createFrame();
+      this.frame();
     }
     
     return this._props;
@@ -344,41 +389,6 @@ p._applyChanges = function() {
   this.rtid = 0;
   this.done.push(props);
   this._next(transitioners, timeout, props.callbacks || []);
-};
-
-/**
-  ### _createFrame
-
-  Create a new animation frame
-**/
-p._createFrame = function() {
-  var ii;
-  var props = {
-    elements: [],
-    manualHelpers: [],
-    callbacks: []
-  };
-  
-  // currentTransform = stylar(this.elements[0]).get('transform', true);
-  props.transform = new ratchet.Transform(); // ratchet(currentTransform);
-  
-  // if we have current properties, then clone the values
-  if (this._props) {
-    // copy each of the elements
-    for (ii = this.elements.length; ii--; ) {
-      props.elements[ii] = _.clone(this._props.elements[ii]) || {};
-    }
-  }
-  // otherwise create the new properties
-  else {
-    for (ii = this.elements.length; ii--; ) {
-      props.elements[ii] = {};
-    }
-  }
-  
-  // initialise the current properties that we are modifying
-  this.queued.push(this._props = props);
-  return this;
 };
 
 /**
