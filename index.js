@@ -4,6 +4,31 @@
 /**
   # Bedazzle
 
+  Bedazzle is a JS animation library that allows you to do some pretty
+  tricky stuff without much effort.  It's quite similar to
+  [move.js](https://github.com/visionmedia/move.js) but uses a frames rather
+  than a `then` function.
+
+  Additionally, bedazzle is more or less a pure CSS manipulation library
+  and doesn't support the additional easing functions that move does. It does
+  work in partnership with your CSS though and aligns animation frames with
+  your transition delays in the CSS (which is pretty neat).
+
+  ## Example Usage
+
+  Consider the following example, which animates a series of divs.  First
+  we have some stripped down html:
+
+  <<< examples/simple.html
+
+  Then some css which is used across most of the examples:
+
+  <<< examples/demo.css
+
+  Finally, a little bit of browserifiable css to make it all work:
+
+  <<< examples/simple.js
+
 **/
 
 var ratchet = require('ratchet');

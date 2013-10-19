@@ -1,31 +1,12 @@
-#container {
-  -webkit-transform-style: preserve-3d;
-  -webkit-perspective: 1000;
-}
 .box {
   width: 40px;
   height: 40px;
   padding: 5px;
   margin: 0 5px 5px 0;
   background: #f00;
-  -webkit-transition: all ease-in-out 0.5s;
-  -moz-transition: all ease-in-out 0.5s;
-  -o-transition: all ease-in-out 0.5s;
-  -ms-transition: all ease-in-out 0.5s;
   transition: all ease-in-out 0.5s;
 }
-.car {
-  width: 100px;
-  height: 20px;
-  background: #808080;
-}
+
 .spinner {
-  -webkit-transition: all linear 0.5s;
-  -moz-transition: all linear 0.5s;
-  -o-transition: all linear 0.5s;
-  -ms-transition: all linear 0.5s;
   transition: all linear 0.5s;
-}
-.float {
-  float: left;
 }
