@@ -89,7 +89,7 @@ in your browser (although I'm still converting somee over).  If you are
 running bde using the default port, you should be able to access the simple
 example from above at the following url:
 
-http://localhost:8080/simple.html
+<http://localhost:8080/simple.html>
 
 ## Reference
 
