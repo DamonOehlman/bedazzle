@@ -7,12 +7,12 @@
     "css3",
     "animation"
   ],
-  "main": "bedazzle.js",
+  "main": "index.js",
   "dependencies": {
     "DamonOehlman/ratchet": "*",
     "DamonOehlman/stylar": "*"
   },
   "scripts": [
-    "bedazzle.js"
+    "index.js"
   ]
 }

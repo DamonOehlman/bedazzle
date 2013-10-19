@@ -1,7 +1,7 @@
 {
   "name": "bedazzle",
   "description": "CSS3 Animation Helpers for JS",
-  "tags": [
+  "keywords": [
     "css3",
     "animation"
   ],
@@ -26,5 +26,8 @@
   "bugs": {
     "url": "http://github.com/DamonOehlman/bedazzle/issues"
   },
-  "contributors": []
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "license": "MIT"
 }
