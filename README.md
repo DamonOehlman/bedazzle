@@ -122,6 +122,8 @@ TBC
 
 TBC
 
+## Internal Methods
+
 ### _applyChanges()
 
 ### _next(transitioners, timeout, callbacks)

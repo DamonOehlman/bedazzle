@@ -340,7 +340,9 @@ _.each(standardProps, function(key) {
   };
 });
 
-/* internal methods */
+/**
+  ## Internal Methods
+**/
 
 /**
   ### _applyChanges()
