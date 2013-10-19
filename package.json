@@ -6,7 +6,7 @@
     "animation"
   ],
   "author": "Damon Oehlman <damon.oehlman@gmail.com>",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "main": "bedazzle",
   "dependencies": {
     "stylar": "~0.2.1",
