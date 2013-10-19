@@ -2,7 +2,7 @@
   "name": "bedazzle",
   "repo": "DamonOehlman/bedazzle",
   "description": "CSS3 Animation Helpers for JS",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "tags": [
     "css3",
     "animation"
