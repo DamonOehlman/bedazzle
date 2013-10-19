@@ -105,20 +105,21 @@ var p = Bedazzler.prototype;
 **/
 p.frame = function(action) {
   var ii;
+  var bedazzler = this;
   var props = {
     elements: [],
     manualHelpers: [],
     callbacks: []
   };
-  
+
   // currentTransform = stylar(this.elements[0]).get('transform', true);
   props.transform = new ratchet.Transform(); // ratchet(currentTransform);
   
   // if we have current properties, then clone the values
-  if (this._props) {
+  if (this.props) {
     // copy each of the elements
     for (ii = this.elements.length; ii--; ) {
-      props.elements[ii] = _.clone(this._props.elements[ii]) || {};
+      props.elements[ii] = _.clone(this.props.elements[ii]) || {};
     }
   }
   // otherwise create the new properties
@@ -127,9 +128,31 @@ p.frame = function(action) {
       props.elements[ii] = {};
     }
   }
-  
-  // initialise the current properties that we are modifying
-  this.queued.push(this._props = props);
+
+  // queue the action
+  this.queued.push(function() {
+    bedazzler.props = props;
+
+    // if we have the action, then run it
+    if (typeof action == 'function') {
+      action.call(bedazzler, bedazzler.elements);
+    }
+
+    // return the props after having being tweaked by this frame
+    return props;
+  });
+
+  // queue it up
+  if (this._opts.immediate) {
+    this._applyChanges();
+  }
+  else {
+    clearTimeout(this.rtid);
+    this.rtid = setTimeout(function() {
+      bedazzler._applyChanges();
+    }, this._opts.frameDelay || 0);
+  }
+
   return this;
 };
 
@@ -154,12 +177,14 @@ p.end = function(callback) {
 
 **/
 p.loop = function() {
-  var bedazzler = this;
-  
-  this.end(function() {
-    bedazzler.queued = bedazzler.done;
-    bedazzler.done = [];
-  });
+  var lastFrame = this.queued[this.queued.length - 1];
+
+  // if we have a last frame mark it as looping
+  if (lastFrame) {
+    lastFrame.loop = true;
+  }
+
+  return this;
 };
 
 /**
@@ -171,7 +196,7 @@ p.loop = function() {
 p.manual = function(helper) {
   this.props.manualHelpers.push(helper);
   
-  return this._changed();
+  return this;
 };
 
 /**
@@ -210,8 +235,8 @@ p.set = function(name, value) {
       props.elements[ii][name] = value;
     }
   }
-  
-  return this._changed();
+
+  return this;
 };
 
 /**
@@ -232,19 +257,6 @@ p.update = function(props, absolute) {
   
   return this;
 };
-
-/**
-  ### @props
-**/
-Object.defineProperty(p, 'props', {
-  get: function() {
-    if (this.queued.length === 0) {
-      this.frame();
-    }
-    
-    return this._props;
-  }
-});
 
 // create the prototype methods for each of the identified
 // transform functions
@@ -285,7 +297,7 @@ transformProps.forEach(function(key) {
       }
     });
 
-    return this._changed();
+    return this;
   };
 });
 
@@ -302,7 +314,7 @@ _.each(percentageProps, function(key) {
       targetProp[key] = currentVal * value;
     }
     
-    return this._changed();
+    return this;
   };
 });
 
@@ -324,7 +336,7 @@ _.each(standardProps, function(key) {
       targetProp[key] = (actualValue + parseFloat(value)) + units;
     }
     
-    return this._changed();
+    return this;
   };
 });
 
@@ -337,18 +349,24 @@ _.each(standardProps, function(key) {
 p._applyChanges = function() {
   var ii;
   var element;
-  var props = this.queued.shift();
+  var props;
+  var frame = this.queued.shift();
   var bedazzler = this;
   var transitionDuration;
   var transitioners = [];
   var timeout = 0;
   var currentTransform;
   var newTransform;
+
+  // debugger;
       
   // if we don't have properties to apply, return
-  if (! props) {
+  if (typeof frame != 'function') {
     return;
   }
+
+  // goto the next frame
+  props = frame();
   
   // if we have manual helpers, then run then now
   props.manualHelpers.forEach(function(helper) {
@@ -386,29 +404,18 @@ p._applyChanges = function() {
     element.set(props.elements[ii]);
   }
   
+  // complete the frame
   this.rtid = 0;
-  this.done.push(props);
-  this._next(transitioners, timeout, props.callbacks || []);
-};
+  this.done.push(frame);
 
-/**
-  ### _changed()
-**/
-p._changed = function() {
-  var bedazzler = this;
-  
-  if (this._opts.immediate) {
-    this._applyChanges();
+  // if the frame is looping, then copy done to queued
+  if (frame.loop) {
+    this.queued = this.done.splice(0);
+    console.log(transitioners, timeout);
   }
-  else {
-    if (! this.rtid) {
-      this.rtid = setTimeout(function() {
-        bedazzler._applyChanges();
-      }, this._opts.frameDelay || 0);
-    }
-  }
-  
-  return this;
+
+  // next frame
+  this._next(transitioners, timeout, props.callbacks || []);
 };
 
 /**
@@ -445,7 +452,7 @@ p._next = function(transitioners, timeout, callbacks) {
   }
   else */
   if (transitionsRemaining > 0) {
-    setTimeout(runNext, timeout || 0);
+    setTimeout(runNext, (timeout || 0) + 20);
   }
   else if (this.queued.length > 0) {
     runNext();
