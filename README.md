@@ -67,6 +67,30 @@ bedazzle('.box')
   });
 ```
 
+## Running the Examples
+
+Running the examples is probably easiest done with
+[bde](https://github.com/DamonOehlman/bde) given custom HTML is used in
+the demos.  Install `bde` using the following command:
+
+```
+npm install -g bde
+```
+
+You can then run bde using the following command:
+
+```
+bde examples
+```
+
+If all is well, you should be able to fire up some of the 
+[examples](https://github.com/DamonOehlman/bedazzle/tree/master/examples)
+in your browser (although I'm still converting somee over).  If you are
+running bde using the default port, you should be able to access the simple
+example from above at the following url:
+
+http://localhost:8080/simple.html
+
 ## Reference
 
 ### bedazzle(elements, opts?)
