@@ -9,9 +9,9 @@
   "version": "0.4.1",
   "main": "bedazzle",
   "dependencies": {
-    "stylar": "~0.2.1",
     "ratchet": "~0.3.0",
-    "underscore": "~1.5.1"
+    "stylar": "~0.2.1",
+    "underscore": "~1.8.2"
   },
   "devDependencies": {
     "crel": "^2.1.8"
