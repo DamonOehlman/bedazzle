@@ -11,7 +11,7 @@
   "dependencies": {
     "ratchet": "~0.3.0",
     "stylar": "~0.2.1",
-    "underscore": "~1.8.2"
+    "underscore": "~1.12.1"
   },
   "devDependencies": {
     "crel": "^2.1.8"
